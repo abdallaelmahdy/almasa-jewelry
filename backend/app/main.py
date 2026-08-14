@@ -4,7 +4,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import health, auth, users, categories, products, gold_prices, pricing, inventory
+from app.api.v1 import health, auth, users, categories, products, gold_prices, pricing, inventory, sales
 from app.core.config import settings
 from app.core.rate_limit import limiter
 
@@ -21,7 +21,7 @@ app.include_router(products.router, prefix=f"{settings.API_V1_STR}/products", ta
 app.include_router(gold_prices.router, prefix=f"{settings.API_V1_STR}/gold-prices", tags=["gold_prices"])
 app.include_router(pricing.router, prefix="/api/v1/pricing", tags=["Pricing"])
 app.include_router(inventory.router, prefix="/api/v1/inventory", tags=["Inventory"])
-
+app.include_router(sales.router, prefix="/api/v1/sales", tags=["Sales"])
 @app.get("/")
 def root():
     return {"message": "Welcome to Almasa Jewelry API"}

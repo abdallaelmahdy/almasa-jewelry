@@ -62,6 +62,16 @@ def client(db_session: Session):
         yield c
     app.dependency_overrides.clear()
 
+@pytest.fixture(scope="function")
+def real_db_client():
+    """
+    Returns a TestClient that uses the actual connection pool without sharing a transaction.
+    WARNING: Commits will actually persist to the test database. Manual cleanup required.
+    """
+    app.dependency_overrides.clear()
+    with TestClient(app) as c:
+        yield c
+
 from app.models.user import User
 from app.core import security
 

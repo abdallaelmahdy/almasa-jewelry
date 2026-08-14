@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from app.db.base_class import Base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects.postgresql import UUID
 
 class Customer(Base):
@@ -15,7 +15,8 @@ class Sale(Base):
     id = Column(Integer, primary_key=True, index=True)
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    status = Column(String, nullable=False, default="COMPLETED") # PENDING, COMPLETED, CANCELLED
+    idempotency_key = Column(String, unique=True, index=True, nullable=False)
+    status = Column(String, nullable=False, default="COMPLETED") # COMPLETED, REFUNDED
     total_amount = Column(Numeric(15, 2), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
@@ -34,7 +35,7 @@ class Invoice(Base):
     pdf_url = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    sale = relationship("Sale", backref="invoice")
+    sale = relationship("Sale", backref=backref("invoice", uselist=False))
 
 class InvoiceItem(Base):
     __tablename__ = "invoice_items"

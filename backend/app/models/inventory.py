@@ -32,6 +32,8 @@ class InventoryItem(Base):
     status = Column(Enum(ItemStatus), default=ItemStatus.AVAILABLE, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=True, onupdate=func.now())
+    locked_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    locked_at = Column(DateTime(timezone=True), nullable=True)
     
     product = relationship("Product")
 
