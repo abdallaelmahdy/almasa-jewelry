@@ -81,3 +81,47 @@ def test_inventory_employee_no_write(client: TestClient, normal_user_token_heade
         json={"product_id": 1, "weight": "12.500", "karat": 21, "manufacturing_fee": "0", "cost_basis": "1000"}
     )
     assert resp.status_code == 403
+def test_inventory_locks_rbac_and_ownership(client: TestClient, admin_token_headers, normal_user_token_headers):
+    # Setup
+    resp_cat = client.post("/api/v1/categories/", headers=admin_token_headers, json={"name": "LockCat"})
+    cat_id = resp_cat.json()["id"]
+    resp_prod = client.post("/api/v1/products/", headers=admin_token_headers, json={"name": "LockProd", "category_id": cat_id})
+    prod_id = resp_prod.json()["id"]
+    resp = client.post("/api/v1/inventory/", headers=admin_token_headers, json={"product_id": prod_id, "weight": "10.000", "karat": 18, "manufacturing_fee": "0", "cost_basis": "10"})
+    inv_id = resp.json()["id"]
+
+    # 1. Employee can lock
+    r_lock = client.post(f"/api/v1/inventory/{inv_id}/lock", json={"reason": "checkout"}, headers=normal_user_token_headers)
+    assert r_lock.status_code == 200
+    assert r_lock.json()["status"] == "LOCKED"
+
+    # Verify locked_by_id and locked_at in DB
+    r_get = client.get(f"/api/v1/inventory/{inv_id}", headers=admin_token_headers)
+    assert r_get.json()["locked_by_id"] is not None
+    assert r_get.json()["locked_at"] is not None
+
+    # 2. Employee cannot unlock another employee's lock
+    # Since we need a second employee, we'll try to unlock with normal_user_token_headers but wait, it is the same user.
+    # We will simulate a different user by making an admin lock it, then employee tries to unlock.
+    
+    # First, unlock it as admin (Admin can force unlock)
+    r_admin_unlock = client.post(f"/api/v1/inventory/{inv_id}/unlock", json={"reason": "admin force"}, headers=admin_token_headers)
+    assert r_admin_unlock.status_code == 200
+    
+    # Admin locks it
+    client.post(f"/api/v1/inventory/{inv_id}/lock", json={"reason": "admin lock"}, headers=admin_token_headers)
+    
+    # Employee tries to unlock admin's lock
+    r_fail_unlock = client.post(f"/api/v1/inventory/{inv_id}/unlock", json={"reason": "fail"}, headers=normal_user_token_headers)
+    assert r_fail_unlock.status_code == 403
+    
+    # Admin unlocks it
+    client.post(f"/api/v1/inventory/{inv_id}/unlock", json={"reason": "admin unlock"}, headers=admin_token_headers)
+
+    # Employee locks it again
+    client.post(f"/api/v1/inventory/{inv_id}/lock", json={"reason": "emp lock"}, headers=normal_user_token_headers)
+
+    # Employee unlocks own lock
+    r_emp_unlock = client.post(f"/api/v1/inventory/{inv_id}/unlock", json={"reason": "emp unlock"}, headers=normal_user_token_headers)
+    assert r_emp_unlock.status_code == 200
+    assert r_emp_unlock.json()["status"] == "AVAILABLE"

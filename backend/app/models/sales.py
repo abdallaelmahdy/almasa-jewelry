@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, CheckConstraint, Index
 from sqlalchemy.sql import func
 from app.db.base_class import Base
 from sqlalchemy.orm import relationship, backref
@@ -9,6 +9,10 @@ class Customer(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     phone = Column(String, nullable=True)
+
+    __table_args__ = (
+        Index('ix_customers_phone_unique', 'phone', unique=True, postgresql_where=Column('phone').isnot(None)),
+    )
 
 class Sale(Base):
     __tablename__ = "sales"

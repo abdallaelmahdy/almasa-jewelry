@@ -49,6 +49,8 @@ class InventoryItemInDBBase(InventoryItemBase):
     status: ItemStatus
     created_at: datetime
     updated_at: Optional[datetime] = None
+    locked_by_id: Optional[int] = None
+    locked_at: Optional[datetime] = None
     model_config = ConfigDict(from_attributes=True)
 
 class InventoryItemOut(InventoryItemInDBBase):

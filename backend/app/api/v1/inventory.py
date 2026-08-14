@@ -159,6 +159,17 @@ def _transition_item(db: Session, current_user: Any, item_id: str, expected_stat
     prev_status = item.status
     item.status = new_status
     
+    if tx_type == TransactionType.UNLOCK:
+        if current_user.role != "admin" and item.locked_by_id != current_user.id:
+            db.rollback()
+            raise HTTPException(status_code=403, detail="Cannot unlock item locked by another user")
+        item.locked_by_id = None
+        item.locked_at = None
+    elif tx_type == TransactionType.LOCK:
+        item.locked_by_id = current_user.id
+        from sqlalchemy.sql import func
+        item.locked_at = func.now()
+    
     tx = InventoryTransaction(
         inventory_item_id=item.id,
         transaction_type=tx_type,
@@ -190,7 +201,7 @@ def lock_inventory(
     db: Session = Depends(deps.get_db),
     id: str,
     req: InventoryTransitionRequest,
-    current_user: Any = Depends(deps.RoleChecker(["admin"]))
+    current_user: Any = Depends(deps.RoleChecker(["admin", "employee"]))
 ) -> Any:
     """Lock an AVAILABLE item"""
     return _transition_item(db, current_user, id, ItemStatus.AVAILABLE, ItemStatus.LOCKED, req, TransactionType.LOCK)
@@ -201,7 +212,7 @@ def unlock_inventory(
     db: Session = Depends(deps.get_db),
     id: str,
     req: InventoryTransitionRequest,
-    current_user: Any = Depends(deps.RoleChecker(["admin"]))
+    current_user: Any = Depends(deps.RoleChecker(["admin", "employee"]))
 ) -> Any:
     """Unlock a LOCKED item to AVAILABLE"""
     return _transition_item(db, current_user, id, ItemStatus.LOCKED, ItemStatus.AVAILABLE, req, TransactionType.UNLOCK)
