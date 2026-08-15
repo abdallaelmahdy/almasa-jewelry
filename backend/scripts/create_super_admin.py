@@ -26,7 +26,7 @@ def create_super_admin():
     print("=" * 50)
     print("ALMASA JEWELRY - SUPER ADMIN BOOTSTRAP")
     print("=" * 50)
-    print(f"Target Database: {os.environ.get('DATABASE_URL')}")
+    print("Target Database: ***redacted for security***")
     print("-" * 50)
 
     username = input("Enter admin username: ").strip()

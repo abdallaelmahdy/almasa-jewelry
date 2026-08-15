@@ -38,7 +38,6 @@ def login_access_token(
     OAuth2 compatible token login, get an access token for future requests.
     """
     user = db.query(User).filter(User.username == form_data.username).first()
-    print(f"DEBUG LOGIN: username={form_data.username}, password={form_data.password}, user_found={user is not None}", flush=True)
     if not user or not security.verify_password(form_data.password, user.hashed_password):
         # We don't log passwords or user info here if failed, generic message
         raise HTTPException(status_code=401, detail="Incorrect email or password")
