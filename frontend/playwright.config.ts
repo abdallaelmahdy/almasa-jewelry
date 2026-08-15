@@ -20,8 +20,7 @@ export default defineConfig({
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
-  /* Global setup for DB seeding */
-  globalSetup: require.resolve('./tests/global-setup'),
+  /* DB setup is now handled via package.json scripts BEFORE Playwright starts */
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */

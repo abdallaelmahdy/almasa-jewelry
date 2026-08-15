@@ -29,8 +29,8 @@ test.describe('POS Checkout and Locking', () => {
 
     // Proceed to checkout
     // Payment amount
-    await page.fill('input[placeholder="المبلغ..."]', '2050'); 
-    await page.click('button:has-text("إضافة دفعة")');
+    await page.fill('input[placeholder="أدخل المبلغ..."]', '2050'); 
+    await page.click('button[title="إضافة دفعة"]');
     
     // Complete Sale
     await page.click('button:has-text("تأكيد وإصدار الفاتورة")');
@@ -71,7 +71,7 @@ test.describe('POS Checkout and Locking', () => {
     // Remove from cart. POSCart.tsx probably uses an X button or trash icon. 
     // Let's assume it has an aria-label="Remove" or we can just find the button in the cart row.
     // I will click the trash button within the cart.
-    await page.click('button.text-destructive');
+    await page.click('button[title="إزالة من السلة"]');
     
     // Ensure it's removed
     await expect(page.locator('text=TEST-003')).toHaveCount(0, { timeout: 10000 });

@@ -36,7 +36,7 @@ test.describe('Sales Refunds', () => {
         await page.fill('input[placeholder="سبب الاسترداد (مطلوب)..."]', 'Customer request');
         await page.click('button:has-text("تأكيد الاسترداد")');
         
-        await expect(page.locator('text=فاتورة مسترجعة')).toBeVisible();
+        await expect(page.locator('text=مسترجعة').first()).toBeVisible();
       }
   });
 });

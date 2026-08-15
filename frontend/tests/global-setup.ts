@@ -21,6 +21,7 @@ try:
     conn = psycopg2.connect("postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry")
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
+    cur.execute("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'almasa_jewelry_test' AND pid <> pg_backend_pid();")
     cur.execute("DROP DATABASE IF EXISTS almasa_jewelry_test;")
     cur.execute("CREATE DATABASE almasa_jewelry_test;")
     cur.close()
@@ -54,10 +55,10 @@ except Exception as e:
   // Run Alembic migrations
   console.log('2. Running Alembic migrations...');
   let alembicCmd = 'alembic';
-  if (fs.existsSync(path.resolve(backendDir, 'venv/Scripts/alembic.exe'))) {
-    alembicCmd = 'backend\\\\venv\\\\Scripts\\\\alembic';
-  } else if (fs.existsSync(path.resolve(backendDir, 'venv/bin/alembic'))) {
-    alembicCmd = 'backend/venv/bin/alembic';
+  if (fs.existsSync(path.resolve(backendDir, 'venv/Scripts/python.exe'))) {
+    alembicCmd = 'backend\\\\venv\\\\Scripts\\\\python -m alembic';
+  } else if (fs.existsSync(path.resolve(backendDir, 'venv/bin/python'))) {
+    alembicCmd = 'backend/venv/bin/python -m alembic';
   }
   
   execSync(`${alembicCmd} upgrade head`, {
