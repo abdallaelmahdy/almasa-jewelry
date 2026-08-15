@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { api } from "@/lib/api";
@@ -10,6 +10,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { user, isInitialized, setAuth, clearAuth, setInitialized } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -50,30 +55,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Route protection logic
     if (isInitialized) {
-      const isPublicRoute = pathname === "/login";
+      const isPublicRoute = pathname === "/" || pathname === "/login";
 
       if (!user && !isPublicRoute) {
         router.push("/login");
-      } else if (user && isPublicRoute) {
-        router.push("/");
+      } else if (user && pathname === "/login") {
+        router.push("/dashboard");
       }
 
       // Add strict RBAC protection
       if (user && user.role === "employee") {
         if (pathname.startsWith("/reports") || pathname.startsWith("/audit")) {
-          router.push("/");
+          router.push("/dashboard");
         }
       }
     }
   }, [isInitialized, user, pathname, router]);
 
+  if (!isMounted) {
+    return <>{children}</>;
+  }
+
   if (!isInitialized) {
     // Show a loading state matching Dark Luxury while auth resolves
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="flex items-center justify-center min-h-screen bg-[#0d0d0d]" suppressHydrationWarning>
         <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-primary font-medium">جاري التحميل...</p>
+          <div className="w-12 h-12 border-4 border-[#c5a059] border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-[#c5a059] font-medium">جاري التحميل...</p>
         </div>
       </div>
     );

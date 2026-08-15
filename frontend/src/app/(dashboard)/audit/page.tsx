@@ -7,8 +7,7 @@ import { useAuditLogs } from "@/hooks/useAudit";
 import { startOfDay, endOfDay } from "date-fns";
 import { ReportDateRange } from "@/components/reports/ReportDateRange";
 import { AuditTable } from "@/components/audit/AuditTable";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { LuxuryButton } from "@/components/luxury/LuxuryButton";
 import { ShieldAlert, Search } from "lucide-react";
 
 export default function AuditPage() {
@@ -67,21 +66,21 @@ export default function AuditPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center gap-3">
-        <div className="bg-primary/20 p-3 rounded-xl text-primary">
+        <div className="bg-[#c5a059]/10 p-3 rounded-xl text-[#c5a059]">
           <ShieldAlert className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">سجل التدقيق والمراقبة</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-3xl font-bold tracking-tight text-white">سجل التدقيق والمراقبة</h2>
+          <p className="text-gray-400 mt-1">
             مراقبة وتتبع جميع الحركات والتعديلات داخل النظام.
           </p>
         </div>
       </div>
 
-      <div className="p-4 bg-card border border-border rounded-xl shadow-sm space-y-4">
+      <div className="p-4 bg-[#0a0a0a] border border-[#262626] rounded-xl shadow-sm space-y-4">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="space-y-1">
-            <label className="text-sm text-muted-foreground">التاريخ</label>
+            <label className="text-sm text-gray-400 font-medium">التاريخ</label>
             <ReportDateRange
               value={{ from: dateRange.from || new Date(), to: dateRange.to || new Date() }}
               onChange={(r) => setDateRange(r)}
@@ -89,66 +88,67 @@ export default function AuditPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm text-muted-foreground">رقم الموظف</label>
-            <Input
+            <label className="text-sm text-gray-400 font-medium">رقم الموظف</label>
+            <input
               type="number"
               placeholder="مثال: 2"
               value={userIdInput}
               onChange={(e) => setUserIdInput(e.target.value)}
-              className="w-32"
+              className="w-32 bg-[#141414] border border-[#262626] rounded-xl px-4 py-2 text-white font-mono placeholder-gray-600 focus:outline-none focus:border-[#c5a059]/50 transition-colors"
               dir="ltr"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm text-muted-foreground">نوع الحركة</label>
-            <Input
+            <label className="text-sm text-gray-400 font-medium">نوع الحركة</label>
+            <input
               placeholder="مثال: SALE_COMPLETED"
               value={actionTypeInput}
               onChange={(e) => setActionTypeInput(e.target.value)}
-              className="w-48"
+              className="w-48 bg-[#141414] border border-[#262626] rounded-xl px-4 py-2 text-white font-mono placeholder-gray-600 focus:outline-none focus:border-[#c5a059]/50 transition-colors"
               dir="ltr"
             />
           </div>
 
           <div className="flex gap-2">
-            <Button onClick={handleApplyFilters} variant="secondary">
+            <LuxuryButton onClick={handleApplyFilters} className="py-2">
               <Search className="w-4 h-4 me-2" />
               تصفية
-            </Button>
-            <Button onClick={handleClearFilters} variant="ghost">
+            </LuxuryButton>
+            <button 
+              onClick={handleClearFilters} 
+              className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+            >
               إلغاء
-            </Button>
+            </button>
           </div>
         </div>
       </div>
 
       {isError ? (
-        <div className="p-4 rounded-md bg-destructive/10 text-destructive border border-destructive/20 text-center">
+        <div className="p-4 rounded-xl bg-[#3f1414] text-[#f87171] border border-[#f87171]/20 text-center font-medium">
           حدث خطأ أثناء جلب السجلات: {(error as any)?.response?.data?.detail || error.message}
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] shadow-sm overflow-hidden">
           <AuditTable logs={logs || []} isLoading={isLoading} />
           
-          <div className="flex items-center justify-between p-4 border-t border-border">
-            <Button
-              variant="outline"
-              size="sm"
+          <div className="flex items-center justify-between p-4 border-t border-[#262626] bg-[#141414]">
+            <button
+              className="px-4 py-2 text-sm text-white bg-[#262626] hover:bg-[#333] border border-[#333] rounded-md transition-colors disabled:opacity-50"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1 || isLoading}
             >
               السابق
-            </Button>
-            <span className="text-sm text-muted-foreground">الصفحة {page}</span>
-            <Button
-              variant="outline"
-              size="sm"
+            </button>
+            <span className="text-sm text-gray-400 font-mono">الصفحة {page}</span>
+            <button
+              className="px-4 py-2 text-sm text-white bg-[#262626] hover:bg-[#333] border border-[#333] rounded-md transition-colors disabled:opacity-50"
               onClick={() => setPage((p) => p + 1)}
               disabled={!logs || logs.length < limit || isLoading}
             >
               التالي
-            </Button>
+            </button>
           </div>
         </div>
       )}

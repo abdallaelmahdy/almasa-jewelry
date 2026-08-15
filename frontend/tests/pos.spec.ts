@@ -8,12 +8,14 @@ test.describe('POS Checkout and Locking', () => {
   test('Add to cart and normal checkout', async ({ page }) => {
     // Explicitly login as admin
     await page.goto('/login');
+    await page.waitForLoadState('networkidle');
     await page.fill('input[name="username"]', 'admin@test.com');
     await page.fill('input[name="password"]', 'Password123!');
     await page.click('button[type="submit"]');
-    await page.waitForURL('http://localhost:3001/');
+    await page.waitForURL('**/dashboard*');
 
     await page.goto('/pos');
+    await page.waitForLoadState('networkidle');
     
     // Search for inventory item
     await page.fill('input[placeholder="ابحث برقم القطعة (SKU) لإضافتها للسلة..."]', 'TEST-001');
@@ -44,12 +46,14 @@ test.describe('POS Checkout and Locking', () => {
   test('Cart removal releases lock', async ({ page }) => {
     // Explicitly login as admin
     await page.goto('/login');
+    await page.waitForLoadState('networkidle');
     await page.fill('input[name="username"]', 'admin@test.com');
     await page.fill('input[name="password"]', 'Password123!');
     await page.click('button[type="submit"]');
-    await page.waitForURL('http://localhost:3001/');
+    await page.waitForURL('**/dashboard*');
 
     await page.goto('/pos');
+    await page.waitForLoadState('networkidle');
     // Search for item 3
     await page.fill('input[placeholder="ابحث برقم القطعة (SKU) لإضافتها للسلة..."]', 'TEST-003');
 

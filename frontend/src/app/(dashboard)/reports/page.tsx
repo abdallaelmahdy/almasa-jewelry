@@ -33,12 +33,12 @@ export default function ReportsPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <div className="bg-primary/20 p-3 rounded-xl text-primary">
+          <div className="bg-[#c5a059]/10 p-3 rounded-xl text-[#c5a059]">
             <BarChart3 className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">التقارير والإحصائيات</h2>
-            <p className="text-muted-foreground mt-1">
+            <h2 className="text-3xl font-bold tracking-tight text-white">التقارير والإحصائيات</h2>
+            <p className="text-gray-400 mt-1">
               متابعة أداء المبيعات والأرباح وقيمة المخزون الحالي.
             </p>
           </div>

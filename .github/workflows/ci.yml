@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: almasa
+          POSTGRES_PASSWORD: almasa_password
+          POSTGRES_DB: almasa_jewelry
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Backend Setup
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest httpx pytest-asyncio
+
+      # Run Backend Tests
+      - name: Run Pytest
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry
+          SECRET_KEY: testing_secret
+        run: |
+          alembic upgrade head
+          pytest
+
+      # Frontend Setup
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: TypeScript validation
+        working-directory: ./frontend
+        run: npx tsc --noEmit
+
+      - name: Next.js build
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8001/api/v1
+        run: npm run build
+
+      - name: Install Playwright Browsers
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright E2E Tests
+        working-directory: ./frontend
+        env:
+          DATABASE_URL: postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry_test
+          NEXT_PUBLIC_API_URL: http://localhost:8001/api/v1
+          SECRET_KEY: testing_secret
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 14

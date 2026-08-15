@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" className="dark">
-      <body className={`${tajawal.variable} font-sans min-h-screen bg-background text-foreground antialiased`}>
+      <body className={`${tajawal.variable} font-sans min-h-screen bg-[#0d0d0d] text-white antialiased`}>
         <QueryProvider>
           <AuthProvider>
             {children}

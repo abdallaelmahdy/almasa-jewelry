@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { api } from "@/lib/api";
 import { useCreateInventory } from "@/hooks/useInventory";
-import { InventoryItemCreate, ProductOut } from "@/types/inventory";
+import { ProductOut } from "@/types/inventory";
 import {
   Dialog,
   DialogContent,
@@ -14,24 +14,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, PackagePlus, Save } from "lucide-react";
+import { LuxuryButton } from "@/components/luxury/LuxuryButton";
 
 const intakeSchema = z.object({
   product_id: z.coerce.number().min(1, "اختر المنتج"),
@@ -94,132 +78,134 @@ export function IntakeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]" dir="rtl">
-        <DialogHeader>
-          <DialogTitle>إضافة مخزون جديد</DialogTitle>
-          <DialogDescription>
-            قم بإدخال تفاصيل القطعة الجديدة لإضافتها إلى المخزون.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[500px] bg-[#0a0a0a] border border-[#262626] p-0 overflow-hidden shadow-2xl" dir="rtl">
+        <div className="bg-[#141414] border-b border-[#262626] p-6 flex items-center gap-3">
+          <div className="bg-[#141414] p-2 rounded-lg border border-[#c5a059]/30 text-[#c5a059] shadow-[0_0_15px_rgba(197,160,89,0.1)]">
+            <PackagePlus className="w-5 h-5" />
+          </div>
+          <div>
+            <DialogTitle className="text-xl font-bold text-white">إضافة مخزون جديد</DialogTitle>
+            <DialogDescription className="text-gray-400 mt-1">
+              قم بإدخال تفاصيل القطعة الجديدة لإضافتها إلى المخزون المتاح.
+            </DialogDescription>
+          </div>
+        </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-4 mt-4">
-            <FormField
-              control={form.control as any}
-              name="product_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>المنتج</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value ? field.value.toString() : ""}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={isLoadingProducts ? "جاري تحميل المنتجات..." : "اختر المنتج"} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {products.map(p => (
-                        <SelectItem key={p.id} value={p.id.toString()}>
-                          {p.name} ({p.sku_prefix})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
+        <div className="p-6">
+          <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-5">
+            
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-300">المنتج <span className="text-[#c5a059]">*</span></label>
+              <select
+                {...form.register("product_id")}
+                className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all appearance-none"
+                disabled={isLoadingProducts}
+              >
+                <option value="0" disabled>{isLoadingProducts ? "جاري تحميل المنتجات..." : "اختر المنتج"}</option>
+                {products.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.sku_prefix})
+                  </option>
+                ))}
+              </select>
+              {form.formState.errors.product_id && (
+                <p className="text-red-400 text-xs mt-1">{form.formState.errors.product_id.message as string}</p>
               )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control as any}
-                name="karat"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>العيار</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر العيار" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="18">18 قيراط</SelectItem>
-                        <SelectItem value="21">21 قيراط</SelectItem>
-                        <SelectItem value="22">22 قيراط</SelectItem>
-                        <SelectItem value="24">24 قيراط</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control as any}
-                name="weight"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الوزن (جم)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="مثال: 12.5" {...field} dir="ltr" className="text-right" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control as any}
-                name="cost_basis"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>التكلفة الأساسية</FormLabel>
-                    <FormControl>
-                      <Input placeholder="0.00" {...field} dir="ltr" className="text-right" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-300">العيار <span className="text-[#c5a059]">*</span></label>
+                <select
+                  {...form.register("karat")}
+                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all appearance-none"
+                >
+                  <option value="18">18 قيراط</option>
+                  <option value="21">21 قيراط</option>
+                  <option value="22">22 قيراط</option>
+                  <option value="24">24 قيراط</option>
+                </select>
+                {form.formState.errors.karat && (
+                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.karat.message as string}</p>
                 )}
-              />
-              <FormField
-                control={form.control as any}
-                name="manufacturing_fee"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>أجرة المصنعية</FormLabel>
-                    <FormControl>
-                      <Input placeholder="0.00" {...field} dir="ltr" className="text-right" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-300">الوزن (جم) <span className="text-[#c5a059]">*</span></label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="مثال: 12.5"
+                  {...form.register("weight")}
+                  dir="ltr"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all text-left font-mono"
+                />
+                {form.formState.errors.weight && (
+                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.weight.message as string}</p>
                 )}
-              />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-300">التكلفة الأساسية <span className="text-[#c5a059]">*</span></label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  {...form.register("cost_basis")}
+                  dir="ltr"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all text-left font-mono"
+                />
+                {form.formState.errors.cost_basis && (
+                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.cost_basis.message as string}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-300">أجرة المصنعية <span className="text-[#c5a059]">*</span></label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  {...form.register("manufacturing_fee")}
+                  dir="ltr"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all text-left font-mono"
+                />
+                {form.formState.errors.manufacturing_fee && (
+                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.manufacturing_fee.message as string}</p>
+                )}
+              </div>
             </div>
 
             {errorMsg && (
-              <div className="p-3 bg-destructive/10 border border-destructive text-destructive-foreground text-sm rounded-md">
+              <div className="p-4 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded-xl text-center">
                 {errorMsg}
               </div>
             )}
 
-            <div className="pt-4 flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={onClose} disabled={createMutation.isPending}>
+            <div className="pt-4 flex justify-end gap-3 border-t border-[#262626]">
+              <button 
+                type="button" 
+                onClick={onClose} 
+                disabled={createMutation.isPending}
+                className="px-6 py-2.5 rounded-xl border border-[#262626] text-gray-400 hover:text-white hover:bg-[#262626] transition-colors"
+              >
                 إلغاء
-              </Button>
-              <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                حفظ وإضافة
-              </Button>
+              </button>
+              <LuxuryButton type="submit" disabled={createMutation.isPending} className="px-8">
+                {createMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 me-2" />
+                    حفظ وإضافة
+                  </>
+                )}
+              </LuxuryButton>
             </div>
           </form>
-        </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );

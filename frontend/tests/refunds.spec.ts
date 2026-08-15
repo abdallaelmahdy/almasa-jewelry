@@ -5,12 +5,13 @@ test.describe('Sales Refunds', () => {
   test('Admin can refund a sale', async ({ page }) => {
     // 1. Explicitly login as admin to avoid any session issues
     await page.goto('/login');
+    await page.waitForLoadState('networkidle');
     await page.fill('input[name="username"]', 'admin@test.com');
     await page.fill('input[name="password"]', 'Password123!');
     await page.click('button[type="submit"]');
     
     // Wait until we reach the dashboard
-    await page.waitForURL('http://localhost:3001/');
+    await page.waitForURL('**/dashboard*');
 
     // 2. A sale is seeded by global-setup.ts
     // Go directly to /sales

@@ -9,7 +9,8 @@ import { POSCustomerSelector } from "@/components/pos/POSCustomerSelector";
 import { POSPaymentForm } from "@/components/pos/POSPaymentForm";
 import { POSSummary } from "@/components/pos/POSSummary";
 import { InvoiceModal } from "@/components/pos/InvoiceModal";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingBag, Box, UserSquare2, Wallet } from "lucide-react";
+import { LuxuryCard, LuxuryCardContent, LuxuryCardHeader, LuxuryCardTitle } from "@/components/luxury/LuxuryCard";
 
 export default function POSPage() {
   const { 
@@ -59,52 +60,80 @@ export default function POSPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="bg-primary/20 p-3 rounded-xl text-primary">
-          <ShoppingCart className="w-6 h-6" />
+    <div className="space-y-8 p-4 md:p-8">
+      <div className="flex items-center gap-4">
+        <div className="bg-[#141414] p-4 rounded-xl border border-[#c5a059]/30 text-[#c5a059] shadow-[0_0_20px_rgba(197,160,89,0.1)]">
+          <ShoppingBag className="w-8 h-8" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">نقطة البيع (POS)</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">نقطة البيع (POS)</h2>
+          <p className="text-gray-400 mt-2">
             إدارة سلة المشتريات، إضافة العملاء، وإصدار الفواتير.
           </p>
         </div>
       </div>
 
       {errorMsg && (
-        <div className="p-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl text-lg font-bold text-center">
+        <div className="p-4 bg-red-950/50 text-red-400 border border-red-900/50 rounded-xl text-lg font-bold text-center shadow-lg">
           {errorMsg}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left/Main Column: Cart & Items */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
-            <h3 className="text-lg font-bold mb-4">1. اختيار القطع</h3>
-            <POSInventorySelector />
-          </div>
+        <div className="lg:col-span-7 xl:col-span-8 space-y-8">
+          <LuxuryCard className="bg-[#0d0d0d] border-[#262626]">
+            <LuxuryCardHeader className="border-b border-[#262626] pb-4">
+              <LuxuryCardTitle className="flex items-center gap-2 text-white">
+                <Box className="w-5 h-5 text-[#c5a059]" />
+                1. اختيار القطع
+              </LuxuryCardTitle>
+            </LuxuryCardHeader>
+            <LuxuryCardContent className="pt-6">
+              <POSInventorySelector />
+            </LuxuryCardContent>
+          </LuxuryCard>
 
-          <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
-            <h3 className="text-lg font-bold mb-4">سلة المشتريات</h3>
-            <POSCart />
-          </div>
-
-          <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
-            <h3 className="text-lg font-bold mb-4">2. ربط العميل (اختياري)</h3>
-            <POSCustomerSelector />
-          </div>
-
-          <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
-            <h3 className="text-lg font-bold mb-4">3. تسجيل الدفعات</h3>
-            <POSPaymentForm />
-          </div>
+          <LuxuryCard className="bg-[#0d0d0d] border-[#262626]">
+            <LuxuryCardHeader className="border-b border-[#262626] pb-4">
+              <LuxuryCardTitle className="flex items-center gap-2 text-white">
+                <ShoppingBag className="w-5 h-5 text-[#c5a059]" />
+                سلة المشتريات
+              </LuxuryCardTitle>
+            </LuxuryCardHeader>
+            <LuxuryCardContent className="pt-6">
+              <POSCart />
+            </LuxuryCardContent>
+          </LuxuryCard>
         </div>
 
-        {/* Right Column: Summary */}
-        <div className="lg:col-span-4">
-          <div className="sticky top-6">
+        {/* Right Column: Customer, Payment & Summary */}
+        <div className="lg:col-span-5 xl:col-span-4 space-y-8">
+          <div className="sticky top-6 space-y-8">
+            <LuxuryCard className="bg-[#0d0d0d] border-[#262626]">
+              <LuxuryCardHeader className="border-b border-[#262626] pb-4">
+                <LuxuryCardTitle className="flex items-center gap-2 text-white text-lg">
+                  <UserSquare2 className="w-5 h-5 text-[#c5a059]" />
+                  2. ربط العميل (اختياري)
+                </LuxuryCardTitle>
+              </LuxuryCardHeader>
+              <LuxuryCardContent className="pt-6">
+                <POSCustomerSelector />
+              </LuxuryCardContent>
+            </LuxuryCard>
+
+            <LuxuryCard className="bg-[#0d0d0d] border-[#262626]">
+              <LuxuryCardHeader className="border-b border-[#262626] pb-4">
+                <LuxuryCardTitle className="flex items-center gap-2 text-white text-lg">
+                  <Wallet className="w-5 h-5 text-[#c5a059]" />
+                  3. تسجيل الدفعات
+                </LuxuryCardTitle>
+              </LuxuryCardHeader>
+              <LuxuryCardContent className="pt-6">
+                <POSPaymentForm />
+              </LuxuryCardContent>
+            </LuxuryCard>
+
             <POSSummary 
               onCheckout={handleCheckout} 
               isSubmitting={checkoutMutation.isPending} 

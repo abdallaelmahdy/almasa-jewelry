@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useInventory, useLockInventory } from "@/hooks/useInventory";
 import { usePOSStore } from "@/stores/posStore";
 import { InventoryItemOut } from "@/types/inventory";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Loader2, Search, Plus } from "lucide-react";
+import { ProductImageFallback } from "@/components/ui/ProductImageFallback";
+import { LuxuryButton } from "@/components/luxury/LuxuryButton";
 
 export function POSInventorySelector() {
   const [skuQuery, setSkuQuery] = useState("");
@@ -64,61 +64,86 @@ export function POSInventorySelector() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="relative">
-        <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
+    <div className="space-y-6">
+      <div className="relative group">
+        <Search className="absolute right-4 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-[#c5a059] transition-colors" />
+        <input
           placeholder="ابحث برقم القطعة (SKU) لإضافتها للسلة..."
           value={skuQuery}
           onChange={(e) => handleSearch(e.target.value)}
-          className="ps-9"
+          className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-12 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all font-mono"
           dir="ltr"
         />
       </div>
 
       {errorMsg && (
-        <div className="p-3 text-sm bg-destructive/10 text-destructive border border-destructive/20 rounded-md">
+        <div className="p-4 text-sm bg-red-950/50 text-red-400 border border-red-900/50 rounded-xl">
           {errorMsg}
         </div>
       )}
 
       {debouncedSku && isLoading && (
-        <div className="flex items-center justify-center p-4">
-          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="w-8 h-8 animate-spin text-[#c5a059]" />
         </div>
       )}
 
       {debouncedSku && !isLoading && results && results.length === 0 && (
-        <div className="text-sm text-muted-foreground p-4 text-center border rounded-md">
-          لا توجد قطع متاحة مطابقة.
+        <div className="text-sm text-gray-500 p-8 text-center border border-[#262626] border-dashed rounded-xl bg-[#0a0a0a]">
+          لا توجد قطع متاحة مطابقة لهذا الرقم.
         </div>
       )}
 
       {debouncedSku && !isLoading && results && results.length > 0 && (
-        <div className="border rounded-md divide-y divide-border bg-card">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {results.map((item) => (
-            <div key={item.id} className="p-3 flex justify-between items-center hover:bg-muted/50">
-              <div>
-                <div className="font-mono font-bold">{item.sku}</div>
-                <div className="text-sm text-muted-foreground">
-                  {item.product.name} - {item.weight} جم - {item.karat} قيراط
+            <div 
+              key={item.id} 
+              className="group relative bg-[#141414] border border-[#262626] rounded-xl overflow-hidden hover:border-[#c5a059]/30 transition-all flex flex-col"
+            >
+              <div className="relative h-40 bg-[#0a0a0a]">
+                <ProductImageFallback
+                  category="مجوهرات"
+                  alt={item.product.name}
+                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#141414] to-transparent"></div>
+                <div className="absolute top-3 right-3">
+                  <span className="bg-[#c5a059] text-[#0d0d0d] text-xs font-bold px-2 py-1 rounded-sm shadow-sm">
+                    {item.karat} قيراط
+                  </span>
+                </div>
+                <div className="absolute bottom-3 left-4 right-4">
+                  <div className="font-mono font-bold text-white text-lg drop-shadow-md">{item.sku}</div>
                 </div>
               </div>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => handleAdd(item)}
-                disabled={lockingId === item.id || cartItems.some(i => i.id === item.id)}
-              >
-                {lockingId === item.id ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4 me-1" />
-                    إضافة
-                  </>
-                )}
-              </Button>
+              
+              <div className="p-4 flex-1 flex flex-col justify-between gap-4">
+                <div>
+                  <h4 className="text-white font-medium text-sm line-clamp-1">{item.product.name}</h4>
+                  <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
+                    <span>الوزن: <span className="font-mono text-[#c5a059]">{item.weight}g</span></span>
+                    <span>الفئة: مجوهرات</span>
+                  </div>
+                </div>
+                
+                <LuxuryButton
+                  onClick={() => handleAdd(item)}
+                  disabled={lockingId === item.id || cartItems.some(i => i.id === item.id)}
+                  className="w-full py-2 h-auto text-sm"
+                >
+                  {lockingId === item.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : cartItems.some(i => i.id === item.id) ? (
+                    "في السلة"
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4 me-2" />
+                      إضافة للسلة
+                    </>
+                  )}
+                </LuxuryButton>
+              </div>
             </div>
           ))}
         </div>

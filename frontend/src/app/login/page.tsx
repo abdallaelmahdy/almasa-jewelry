@@ -62,7 +62,7 @@ export default function LoginPage() {
 
       // 3. Populate AuthStore and redirect
       setAuth(userRes.data, access_token);
-      router.push("/");
+      router.push("/dashboard");
     } catch (error: any) {
       if (error.response?.status === 401) {
         setErrorMsg("اسم المستخدم أو كلمة المرور غير صحيحة");

@@ -6,17 +6,7 @@ import { ar } from "date-fns/locale";
 import { InventoryItemOut } from "@/types/inventory";
 import { User } from "@/types/auth";
 import { useLockInventory, useUnlockInventory } from "@/hooks/useInventory";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Lock, Unlock, Loader2 } from "lucide-react";
+import { Lock, Unlock, Loader2, Key } from "lucide-react";
 
 export function InventoryTable({
   items,
@@ -35,15 +25,15 @@ export function InventoryTable({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "AVAILABLE":
-        return <Badge variant="default" className="bg-green-600 hover:bg-green-700">متاح</Badge>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#142617] text-[#4ade80] border border-[#4ade80]/20">متاح</span>;
       case "LOCKED":
-        return <Badge variant="secondary" className="bg-yellow-600 hover:bg-yellow-700 text-white">مقفول</Badge>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#3b2a0c] text-[#fbbf24] border border-[#fbbf24]/20">مقفول</span>;
       case "SOLD":
-        return <Badge variant="outline" className="text-muted-foreground">مباع</Badge>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#141414] text-gray-400 border border-[#262626]">مباع</span>;
       case "RETURNED":
-        return <Badge variant="destructive">مسترجع</Badge>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#3f1414] text-[#f87171] border border-[#f87171]/20">مسترجع</span>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#141414] text-gray-400 border border-[#262626]">{status}</span>;
     }
   };
 
@@ -77,36 +67,37 @@ export function InventoryTable({
 
   if (isLoading) {
     return (
-      <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin mb-4 text-primary" />
-        جاري تحميل المخزون...
+      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-xl">
+        <Loader2 className="h-8 w-8 animate-spin mb-4 text-[#c5a059]" />
+        <span className="text-gray-400 font-medium">جاري تحميل المخزون...</span>
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="p-8 text-center text-muted-foreground">
-        لا توجد قطع مطابقة للبحث.
+      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-xl border-dashed">
+        <Key className="h-10 w-10 text-[#262626] mb-4" />
+        <span className="text-gray-500 font-medium">لا توجد قطع مطابقة للبحث.</span>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead className="text-right">رقم القطعة (SKU)</TableHead>
-            <TableHead className="text-right">المنتج</TableHead>
-            <TableHead className="text-right">الوزن</TableHead>
-            <TableHead className="text-right">العيار</TableHead>
-            <TableHead className="text-right">الحالة</TableHead>
-            <TableHead className="text-right">تاريخ الإضافة</TableHead>
-            <TableHead className="text-center">إجراءات القفل</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+    <div className="overflow-x-auto bg-[#0a0a0a] border border-[#262626] rounded-xl">
+      <table className="w-full text-right border-collapse">
+        <thead>
+          <tr className="bg-[#141414] border-b border-[#262626] text-gray-400 text-sm">
+            <th className="p-4 font-medium whitespace-nowrap">رقم القطعة (SKU)</th>
+            <th className="p-4 font-medium whitespace-nowrap">المنتج</th>
+            <th className="p-4 font-medium whitespace-nowrap">الوزن</th>
+            <th className="p-4 font-medium whitespace-nowrap">العيار</th>
+            <th className="p-4 font-medium whitespace-nowrap">الحالة</th>
+            <th className="p-4 font-medium whitespace-nowrap">تاريخ الإضافة</th>
+            <th className="p-4 font-medium text-center whitespace-nowrap">إجراءات القفل</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[#262626]">
           {items.map((item) => {
             const isLocked = item.status === "LOCKED";
             const isAvailable = item.status === "AVAILABLE";
@@ -117,58 +108,65 @@ export function InventoryTable({
             const isOperating = operatingId === item.id;
 
             return (
-              <TableRow key={item.id}>
-                <TableCell className="font-mono font-medium">{item.sku}</TableCell>
-                <TableCell>{item.product.name}</TableCell>
-                <TableCell>{item.weight} جم</TableCell>
-                <TableCell>{item.karat}</TableCell>
-                <TableCell>
-                  <div className="flex flex-col gap-1">
+              <tr key={item.id} className="hover:bg-[#141414]/50 transition-colors">
+                <td className="p-4 font-mono font-bold text-white whitespace-nowrap">{item.sku}</td>
+                <td className="p-4 text-gray-300 font-medium whitespace-nowrap">{item.product.name}</td>
+                <td className="p-4 whitespace-nowrap">
+                  <span className="font-mono text-[#c5a059] bg-[#141414] px-2 py-1 rounded border border-[#262626]">
+                    {item.weight} <span className="text-xs text-gray-500">g</span>
+                  </span>
+                </td>
+                <td className="p-4 whitespace-nowrap">
+                  <span className="bg-[#141414] text-gray-300 px-2 py-1 rounded border border-[#262626] font-mono">
+                    {item.karat}
+                  </span>
+                </td>
+                <td className="p-4 whitespace-nowrap">
+                  <div className="flex flex-col gap-1.5 items-start">
                     <div>{getStatusBadge(item.status)}</div>
                     {isLocked && item.locked_by_id && (
-                      <span className="text-[10px] text-muted-foreground">
-                        بواسطة: {item.locked_by_id}
+                      <span className="text-[10px] text-gray-500 bg-[#141414] px-1.5 py-0.5 rounded flex items-center gap-1 border border-[#262626]">
+                        <Key className="w-3 h-3" />
+                        موظف رقم: {item.locked_by_id}
                       </span>
                     )}
                   </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
+                </td>
+                <td className="p-4 text-gray-500 text-sm whitespace-nowrap font-mono">
                   {format(new Date(item.created_at), "dd MMM yyyy", { locale: ar })}
-                </TableCell>
-                <TableCell className="text-center">
-                  {canLock && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-yellow-500 hover:text-yellow-600 hover:bg-yellow-500/10 border-yellow-500/20"
-                      onClick={() => handleLock(item.id)}
-                      disabled={isOperating}
-                    >
-                      {isOperating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4 me-1" />}
-                      قفل
-                    </Button>
-                  )}
-                  {canUnlock && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-green-500 hover:text-green-600 hover:bg-green-500/10 border-green-500/20"
-                      onClick={() => handleUnlock(item.id)}
-                      disabled={isOperating}
-                    >
-                      {isOperating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4 me-1" />}
-                      {user.role === "admin" && user.id !== item.locked_by_id ? "فتح إجباري" : "فتح"}
-                    </Button>
-                  )}
-                  {!canLock && !canUnlock && (
-                    <span className="text-xs text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-              </TableRow>
+                </td>
+                <td className="p-4 text-center whitespace-nowrap">
+                  <div className="flex items-center justify-center gap-2">
+                    {canLock && (
+                      <button
+                        className="flex items-center justify-center px-3 py-1.5 text-xs font-bold text-[#fbbf24] bg-[#fbbf24]/10 border border-[#fbbf24]/20 rounded-md hover:bg-[#fbbf24]/20 transition-colors disabled:opacity-50"
+                        onClick={() => handleLock(item.id)}
+                        disabled={isOperating}
+                      >
+                        {isOperating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5 me-1.5" />}
+                        قفل
+                      </button>
+                    )}
+                    {canUnlock && (
+                      <button
+                        className="flex items-center justify-center px-3 py-1.5 text-xs font-bold text-[#4ade80] bg-[#4ade80]/10 border border-[#4ade80]/20 rounded-md hover:bg-[#4ade80]/20 transition-colors disabled:opacity-50"
+                        onClick={() => handleUnlock(item.id)}
+                        disabled={isOperating}
+                      >
+                        {isOperating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Unlock className="w-3.5 h-3.5 me-1.5" />}
+                        {user.role === "admin" && user.id !== item.locked_by_id ? "فتح إجباري" : "فتح"}
+                      </button>
+                    )}
+                    {!canLock && !canUnlock && (
+                      <span className="text-xs text-gray-600 font-mono">-</span>
+                    )}
+                  </div>
+                </td>
+              </tr>
             );
           })}
-        </TableBody>
-      </Table>
+        </tbody>
+      </table>
     </div>
   );
 }

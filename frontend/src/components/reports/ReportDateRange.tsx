@@ -1,7 +1,7 @@
 "use client";
 
 import { format, parseISO } from "date-fns";
-import { Input } from "@/components/ui/input";
+
 
 interface DateRange {
   from: Date;
@@ -28,23 +28,25 @@ export function ReportDateRange({
   };
 
   return (
-    <div className="flex items-center gap-2 bg-card border border-border p-2 rounded-lg shadow-sm">
+    <div className="flex items-center gap-2 bg-[#141414] border border-[#262626] p-2 rounded-xl shadow-sm">
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground ms-2">من</span>
-        <Input 
+        <span className="text-sm text-gray-400 ms-2 font-medium">من</span>
+        <input 
           type="date" 
           value={format(value.from, "yyyy-MM-dd")}
           onChange={handleFromChange}
-          className="w-auto"
+          className="w-auto bg-[#0a0a0a] border border-[#262626] rounded-md px-3 py-1.5 text-white font-mono text-sm focus:outline-none focus:border-[#c5a059]/50 transition-colors"
+          dir="ltr"
         />
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">إلى</span>
-        <Input 
+        <span className="text-sm text-gray-400 font-medium">إلى</span>
+        <input 
           type="date" 
           value={format(value.to, "yyyy-MM-dd")}
           onChange={handleToChange}
-          className="w-auto"
+          className="w-auto bg-[#0a0a0a] border border-[#262626] rounded-md px-3 py-1.5 text-white font-mono text-sm focus:outline-none focus:border-[#c5a059]/50 transition-colors"
+          dir="ltr"
         />
       </div>
     </div>

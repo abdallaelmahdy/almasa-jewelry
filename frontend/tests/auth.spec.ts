@@ -6,6 +6,7 @@ test.describe('Authentication and RBAC', () => {
 
   test('Invalid login shows error', async ({ page }) => {
     await page.goto('/login');
+    await page.waitForLoadState('networkidle');
     await page.fill('input[name="username"]', 'wrong@test.com');
     await page.fill('input[name="password"]', 'wrong');
     await page.click('button[type="submit"]');
@@ -16,10 +17,11 @@ test.describe('Authentication and RBAC', () => {
 
   test('Valid login redirects to POS for employee', async ({ page }) => {
     await page.goto('/login');
+    await page.waitForLoadState('networkidle');
     await page.fill('input[name="username"]', 'employee@test.com');
     await page.fill('input[name="password"]', 'Password123!');
     await page.click('button[type="submit"]');
 
-    await expect(page).toHaveURL('http://localhost:3001/');
+    await expect(page).toHaveURL(/.*\/dashboard.*/);
   });
 });

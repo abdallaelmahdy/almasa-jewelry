@@ -18,7 +18,7 @@ async function globalSetup(config: FullConfig) {
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 try:
-    conn = psycopg2.connect("postgresql://almasa:almasa_password@localhost:5432/postgres")
+    conn = psycopg2.connect("postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry")
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
     cur.execute("DROP DATABASE IF EXISTS almasa_jewelry_test;")

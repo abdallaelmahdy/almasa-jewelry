@@ -1,4 +1,10 @@
 import pytest
+import os
+
+# FORCE TEST DATABASE FOR ALL PYTEST RUNS TO PROTECT DEVELOPMENT DB
+os.environ["DATABASE_URL"] = "postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry_test"
+os.environ["ENVIRONMENT"] = "test"
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session

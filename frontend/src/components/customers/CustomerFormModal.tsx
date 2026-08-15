@@ -12,17 +12,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserPlus, Save, X } from "lucide-react";
+import { LuxuryButton } from "@/components/luxury/LuxuryButton";
 
 const customerSchema = z.object({
   name: z.string().min(1, "اسم العميل مطلوب"),
@@ -110,95 +101,108 @@ export function CustomerFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]" dir="rtl">
-        <DialogHeader>
-          <DialogTitle>{isEditing ? "تعديل بيانات العميل" : "إضافة عميل جديد"}</DialogTitle>
-          <DialogDescription>
-            {isEditing ? "قم بتحديث بيانات العميل أدناه." : "أدخل تفاصيل العميل الجديد."}
-          </DialogDescription>
-        </DialogHeader>
-
-        {isEditing && isLoadingCurrent ? (
-          <div className="flex justify-center p-6">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <DialogContent className="sm:max-w-[500px] bg-[#0a0a0a] border border-[#262626] p-0 overflow-hidden shadow-2xl" dir="rtl">
+        <div className="bg-[#141414] border-b border-[#262626] p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-[#141414] p-2 rounded-lg border border-[#c5a059]/30 text-[#c5a059] shadow-[0_0_15px_rgba(197,160,89,0.1)]">
+              <UserPlus className="w-5 h-5" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-bold text-white">
+                {isEditing ? "تعديل بيانات العميل" : "إضافة عميل جديد"}
+              </DialogTitle>
+              <DialogDescription className="text-gray-400 mt-1">
+                {isEditing ? "قم بتحديث بيانات العميل في النظام." : "أدخل بيانات العميل الجديد لإضافته للنظام."}
+              </DialogDescription>
+            </div>
           </div>
-        ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-4 mt-4">
-              <FormField
-                control={form.control as any}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>اسم العميل *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="الاسم الكامل" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        </div>
 
-              <FormField
-                control={form.control as any}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>رقم الهاتف</FormLabel>
-                    <FormControl>
-                      <Input placeholder="مثال: 0501234567" {...field} dir="ltr" className="text-right" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+        <div className="p-6">
+          {isEditing && isLoadingCurrent ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-[#c5a059]" />
+            </div>
+          ) : (
+            <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-5">
+              
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-300">اسم العميل <span className="text-[#c5a059]">*</span></label>
+                <input 
+                  placeholder="الاسم الكامل للعميل" 
+                  {...form.register("name")} 
+                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all"
+                />
+                {form.formState.errors.name && (
+                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.name.message as string}</p>
                 )}
-              />
+              </div>
 
-              <FormField
-                control={form.control as any}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>البريد الإلكتروني</FormLabel>
-                    <FormControl>
-                      <Input placeholder="email@example.com" {...field} dir="ltr" className="text-right" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-300">رقم الهاتف</label>
+                <input 
+                  placeholder="مثال: 0501234567" 
+                  {...form.register("phone")} 
+                  dir="ltr" 
+                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all font-mono text-left"
+                />
+                {form.formState.errors.phone && (
+                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.phone.message as string}</p>
                 )}
-              />
+              </div>
 
-              <FormField
-                control={form.control as any}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ملاحظات</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ملاحظات إضافية عن العميل" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-300">البريد الإلكتروني</label>
+                <input 
+                  placeholder="email@example.com" 
+                  {...form.register("email")} 
+                  dir="ltr" 
+                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all font-mono text-left"
+                />
+                {form.formState.errors.email && (
+                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.email.message as string}</p>
                 )}
-              />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-300">ملاحظات</label>
+                <textarea 
+                  placeholder="ملاحظات إضافية عن العميل (اختياري)" 
+                  {...form.register("notes")} 
+                  rows={3}
+                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all resize-none"
+                />
+              </div>
 
               {errorMsg && (
-                <div className="p-3 bg-destructive/10 border border-destructive text-destructive-foreground text-sm rounded-md">
+                <div className="p-4 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded-xl text-center">
                   {errorMsg}
                 </div>
               )}
 
-              <div className="pt-4 flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
+              <div className="pt-4 flex justify-end gap-3 border-t border-[#262626]">
+                <button 
+                  type="button" 
+                  onClick={onClose} 
+                  disabled={isPending}
+                  className="px-6 py-2.5 rounded-xl border border-[#262626] text-gray-400 hover:text-white hover:bg-[#262626] transition-colors"
+                >
                   إلغاء
-                </Button>
-                <Button type="submit" disabled={isPending}>
-                  {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  حفظ
-                </Button>
+                </button>
+                <LuxuryButton type="submit" disabled={isPending} className="px-8">
+                  {isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 me-2" />
+                      حفظ
+                    </>
+                  )}
+                </LuxuryButton>
               </div>
             </form>
-          </Form>
-        )}
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
