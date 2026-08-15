@@ -1,18 +1,30 @@
 import type { Metadata } from "next";
-import { Tajawal } from "next/font/google";
+import { Amiri, Alexandria, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 
-const tajawal = Tajawal({
+const amiri = Amiri({
   subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "700"],
-  variable: "--font-tajawal",
+  weight: ["400", "700"],
+  variable: "--font-amiri",
+});
+
+const alexandria = Alexandria({
+  subsets: ["arabic", "latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-alexandria",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-playfair",
 });
 
 export const metadata: Metadata = {
-  title: "Almasa Jewelry",
-  description: "Gold & Jewelry Shop Management System",
+  title: "ALMASA | الماسة للمجوهرات",
+  description: "High-end jewelry maison and operational terminal.",
 };
 
 export default function RootLayout({
@@ -22,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" className="dark">
-      <body className={`${tajawal.variable} font-sans min-h-screen bg-[#0d0d0d] text-white antialiased`}>
+      <body className={`${amiri.variable} ${alexandria.variable} ${playfair.variable} font-sans min-h-screen bg-[#080808] text-[#f4f1ea] antialiased selection:bg-[#d0b47a]/30 selection:text-white`}>
         <QueryProvider>
           <AuthProvider>
             {children}

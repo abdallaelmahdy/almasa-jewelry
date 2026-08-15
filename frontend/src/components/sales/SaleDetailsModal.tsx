@@ -79,7 +79,7 @@ export function SaleDetailsModal({
         ) : (
           <div className="p-6">
             {/* Printable Invoice Area (Clean White for Printing, but elegant on screen) */}
-            <div className={`printable-invoice p-8 rounded-xl shadow-inner min-h-[500px] border ${sale.status === "REFUNDED" ? "bg-[#fffafa] border-red-200 text-black" : "bg-white border-gray-200 text-black"}`} dir="rtl">
+            <div className={`printable-invoice p-8 rounded-none shadow-inner min-h-[500px] border ${sale.status === "REFUNDED" ? "bg-[#fffafa] border-red-200 text-black" : "bg-white border-gray-200 text-black"}`} dir="rtl">
               
               {/* Header */}
               <div className="text-center border-b-2 border-black pb-6 mb-6">
@@ -169,7 +169,7 @@ export function SaleDetailsModal({
 
             {/* Admin Refund Controls */}
             {user?.role === "admin" && sale.status === "COMPLETED" && (
-              <div className="print-hidden mt-6 p-5 border border-red-900/30 bg-[#3f1414]/10 rounded-xl space-y-4">
+              <div className="print-hidden mt-6 p-5 border border-red-900/30 bg-[#3f1414]/10 rounded-none space-y-4">
                 {!isConfirmingRefund ? (
                   <div className="flex justify-between items-center">
                     <div>
@@ -196,7 +196,7 @@ export function SaleDetailsModal({
                       placeholder="سبب الاسترداد (مطلوب)..."
                       value={refundReason}
                       onChange={(e) => setRefundReason(e.target.value)}
-                      className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition-all"
+                      className="w-full bg-[#141414] border border-[#262626] rounded-none py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition-all"
                     />
                     {errorMsg && <p className="text-sm text-red-400 font-bold">{errorMsg}</p>}
                     <div className="flex justify-end gap-2 mt-4">
@@ -223,7 +223,7 @@ export function SaleDetailsModal({
 
             <div className="print-hidden flex justify-end gap-3 mt-6 pt-6 border-t border-[#262626]">
               <button 
-                className="px-6 py-2.5 rounded-xl border border-[#262626] text-gray-400 hover:text-white hover:bg-[#262626] transition-colors"
+                className="px-6 py-2.5 rounded-none border border-[#262626] text-gray-400 hover:text-white hover:bg-[#262626] transition-colors"
                 onClick={onClose}
               >
                 إغلاق

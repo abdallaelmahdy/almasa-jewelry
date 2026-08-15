@@ -4,7 +4,6 @@ import { useState } from "react";
 import { usePOSStore } from "@/stores/posStore";
 import { useUnlockInventory } from "@/hooks/useInventory";
 import { Loader2, Trash2, PackageSearch } from "lucide-react";
-import { ProductImageFallback } from "@/components/ui/ProductImageFallback";
 
 export function POSCart() {
   const cartItems = usePOSStore((state) => state.cartItems);
@@ -18,12 +17,10 @@ export function POSCart() {
     setUnlockingId(id);
     setErrorMsg(null);
     try {
-      // 1. Call unlock
       await unlockMutation.mutateAsync({
         id,
         payload: { reason: "MANUAL_UNLOCK" },
       });
-      // 2. Remove from cart ONLY if unlock succeeds
       removeItem(id);
     } catch (err: any) {
       setErrorMsg("فشل إزالة القطعة من السلة (تعذر الفتح في الخادم). الرجاء المحاولة مرة أخرى.");
@@ -34,12 +31,11 @@ export function POSCart() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center border border-[#262626] border-dashed rounded-xl bg-[#0a0a0a]">
-        <div className="w-16 h-16 bg-[#141414] rounded-full flex items-center justify-center mb-4">
-          <PackageSearch className="w-8 h-8 text-[#262626]" />
+      <div className="flex flex-col items-center justify-center p-12 text-center border border-white/5 border-dashed bg-white/[0.01]">
+        <div className="w-12 h-12 flex items-center justify-center mb-4 border border-white/10 bg-white/[0.02]">
+          <PackageSearch className="w-5 h-5 text-white/30" />
         </div>
-        <p className="text-gray-500 font-medium">السلة فارغة</p>
-        <p className="text-xs text-gray-600 mt-1">قم بالبحث عن القطع وإضافتها لبدء الفاتورة</p>
+        <p className="font-sans text-xs uppercase tracking-luxury text-white/50">السلة فارغة</p>
       </div>
     );
   }
@@ -47,32 +43,25 @@ export function POSCart() {
   return (
     <div className="space-y-4">
       {errorMsg && (
-        <div className="p-4 text-sm bg-red-950/50 text-red-400 border border-red-900/50 rounded-xl">
+        <div className="p-4 text-[10px] uppercase font-sans tracking-luxury bg-red-950/20 text-red-500 border-l-2 border-red-500">
           {errorMsg}
         </div>
       )}
-      <div className="border border-[#262626] rounded-xl divide-y divide-[#262626] bg-[#0a0a0a] overflow-hidden">
+      <div className="border-t border-white/10 flex flex-col gap-0">
         {cartItems.map((item) => (
-          <div key={item.id} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-[#141414] transition-colors group">
+          <div key={item.id} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-white/[0.02] border-b border-white/5 transition-colors group">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-lg overflow-hidden border border-[#262626] bg-[#141414] flex-shrink-0">
-                <ProductImageFallback
-                  category="مجوهرات"
-                  alt={item.product.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
               <div>
-                <div className="font-mono font-bold text-white text-lg">{item.sku}</div>
-                <div className="text-gray-400 text-sm mb-1">
+                <div className="font-numeric font-bold text-white tracking-widest">{item.sku}</div>
+                <div className="font-sans text-[10px] text-muted-foreground mt-1 tracking-wide">
                   {item.product.name}
                 </div>
-                <div className="text-xs flex gap-3 text-gray-500 font-medium">
-                  <span className="bg-[#141414] px-2 py-0.5 rounded border border-[#262626]">
-                    وزن: <span className="font-mono text-[#c5a059]">{item.weight}g</span>
+                <div className="text-xs flex gap-3 text-white/50 mt-2 font-medium">
+                  <span className="font-sans text-[9px] uppercase tracking-luxury">
+                    الوزن: <span className="font-numeric text-primary tracking-widest ml-1">{item.weight}G</span>
                   </span>
-                  <span className="bg-[#141414] px-2 py-0.5 rounded border border-[#262626]">
-                    عيار: <span className="font-mono text-[#c5a059]">{item.karat}</span>
+                  <span className="font-sans text-[9px] uppercase tracking-luxury">
+                    العيار: <span className="font-numeric text-primary tracking-widest ml-1">{item.karat}</span>
                   </span>
                 </div>
               </div>
@@ -81,13 +70,13 @@ export function POSCart() {
             <button
               onClick={() => handleRemove(item.id)}
               disabled={unlockingId === item.id}
-              className="text-gray-500 hover:text-red-400 p-2 rounded-md hover:bg-red-950/30 transition-all self-end sm:self-auto disabled:opacity-50"
+              className="text-white/30 hover:text-red-500 p-2 border border-transparent hover:border-red-500/30 hover:bg-red-500/10 transition-all self-end sm:self-auto disabled:opacity-50"
               title="إزالة من السلة"
             >
               {unlockingId === item.id ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Trash2 className="w-5 h-5" />
+                <Trash2 className="w-4 h-4" />
               )}
             </button>
           </div>

@@ -98,7 +98,7 @@ export function IntakeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
               <label className="text-sm font-medium text-gray-300">المنتج <span className="text-[#c5a059]">*</span></label>
               <select
                 {...form.register("product_id")}
-                className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all appearance-none"
+                className="w-full bg-[#141414] border border-[#262626] rounded-none py-3 px-4 text-white focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all appearance-none"
                 disabled={isLoadingProducts}
               >
                 <option value="0" disabled>{isLoadingProducts ? "جاري تحميل المنتجات..." : "اختر المنتج"}</option>
@@ -118,7 +118,7 @@ export function IntakeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                 <label className="text-sm font-medium text-gray-300">العيار <span className="text-[#c5a059]">*</span></label>
                 <select
                   {...form.register("karat")}
-                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all appearance-none"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-none py-3 px-4 text-white focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all appearance-none"
                 >
                   <option value="18">18 قيراط</option>
                   <option value="21">21 قيراط</option>
@@ -138,7 +138,7 @@ export function IntakeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                   placeholder="مثال: 12.5"
                   {...form.register("weight")}
                   dir="ltr"
-                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all text-left font-mono"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-none py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all text-left font-mono"
                 />
                 {form.formState.errors.weight && (
                   <p className="text-red-400 text-xs mt-1">{form.formState.errors.weight.message as string}</p>
@@ -155,7 +155,7 @@ export function IntakeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                   placeholder="0.00"
                   {...form.register("cost_basis")}
                   dir="ltr"
-                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all text-left font-mono"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-none py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all text-left font-mono"
                 />
                 {form.formState.errors.cost_basis && (
                   <p className="text-red-400 text-xs mt-1">{form.formState.errors.cost_basis.message as string}</p>
@@ -170,7 +170,7 @@ export function IntakeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                   placeholder="0.00"
                   {...form.register("manufacturing_fee")}
                   dir="ltr"
-                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all text-left font-mono"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-none py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all text-left font-mono"
                 />
                 {form.formState.errors.manufacturing_fee && (
                   <p className="text-red-400 text-xs mt-1">{form.formState.errors.manufacturing_fee.message as string}</p>
@@ -179,7 +179,7 @@ export function IntakeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
             </div>
 
             {errorMsg && (
-              <div className="p-4 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded-xl text-center">
+              <div className="p-4 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded-none text-center">
                 {errorMsg}
               </div>
             )}
@@ -189,7 +189,7 @@ export function IntakeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                 type="button" 
                 onClick={onClose} 
                 disabled={createMutation.isPending}
-                className="px-6 py-2.5 rounded-xl border border-[#262626] text-gray-400 hover:text-white hover:bg-[#262626] transition-colors"
+                className="px-6 py-2.5 rounded-none border border-[#262626] text-gray-400 hover:text-white hover:bg-[#262626] transition-colors"
               >
                 إلغاء
               </button>

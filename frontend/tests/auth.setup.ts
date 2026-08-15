@@ -28,8 +28,13 @@ setup('authenticate as employee', async ({ page }) => {
   await page.fill('input[name="username"]', 'employee@test.com');
   await page.fill('input[name="password"]', 'Password123!');
   await page.click('button[type="submit"]');
-  // Wait until the page receives the cookies and redirects to dashboard.
-  await page.waitForURL('**/dashboard*');
+  try {
+    await page.waitForURL('**/dashboard*', { timeout: 10000 });
+  } catch (e) {
+    const text = await page.locator('body').innerText();
+    console.log("PAGE TEXT (EMPLOYEE):", text);
+    throw e;
+  }
   // End of authentication steps.
   await page.context().storageState({ path: employeeFile });
 });

@@ -8,7 +8,6 @@ import { ReportDateRange } from "@/components/reports/ReportDateRange";
 import { SalesSummaryCards } from "@/components/reports/SalesSummaryCards";
 import { SalesSummaryChart } from "@/components/reports/SalesSummaryChart";
 import { InventoryValuationCard } from "@/components/reports/InventoryValuationCard";
-import { BarChart3 } from "lucide-react";
 
 export default function ReportsPage() {
   const { user } = useAuthStore();
@@ -30,18 +29,13 @@ export default function ReportsPage() {
   if (!user || user.role !== "admin") return null;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-[#c5a059]/10 p-3 rounded-xl text-[#c5a059]">
-            <BarChart3 className="w-6 h-6" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-white">التقارير والإحصائيات</h2>
-            <p className="text-gray-400 mt-1">
-              متابعة أداء المبيعات والأرباح وقيمة المخزون الحالي.
-            </p>
-          </div>
+    <div className="space-y-8 max-w-[1600px] mx-auto px-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end pb-6 border-b border-white/5 gap-6">
+        <div className="flex flex-col gap-2">
+          <h2 className="font-display text-3xl md:text-4xl text-white">التقارير</h2>
+          <p className="font-sans text-xs text-muted-foreground uppercase tracking-wide">
+            ALMASA EXECUTIVE SUMMARY
+          </p>
         </div>
 
         <ReportDateRange 

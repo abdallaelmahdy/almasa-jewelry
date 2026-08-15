@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { GoldPriceOut } from "@/types/sales";
 import { Loader2, CheckCircle, Receipt } from "lucide-react";
-import { LuxuryButton } from "@/components/luxury/LuxuryButton";
 
 export function POSSummary({ 
   onCheckout, 
@@ -57,75 +56,72 @@ export function POSSummary({
   const canCheckout = cartItems.length > 0 && payments.length > 0;
 
   return (
-    <div className="bg-[#0a0a0a] border border-[#262626] rounded-xl flex flex-col relative overflow-hidden">
+    <div className="flex flex-col relative overflow-hidden h-full">
       {/* Invoice Header */}
-      <div className="bg-[#141414] border-b border-[#262626] p-6 flex items-center justify-between">
-        <h3 className="text-xl font-bold text-white flex items-center gap-3">
-          <Receipt className="w-6 h-6 text-[#c5a059]" />
+      <div className="bg-primary/10 border-b border-primary/20 px-4 py-3 flex items-center justify-between shrink-0">
+        <h3 className="font-sans text-[11px] uppercase tracking-luxury-wide text-primary flex items-center gap-2">
+          <Receipt className="w-3.5 h-3.5" />
           ملخص الفاتورة
         </h3>
-        <span className="text-xs font-mono text-gray-500 bg-[#0d0d0d] px-2 py-1 rounded border border-[#262626]">
+        <span className="font-numeric text-[9px] text-primary/70 tracking-widest">
           {new Date().toISOString().split('T')[0]}
         </span>
       </div>
 
-      <div className="p-6 space-y-6">
-        <div className="space-y-4">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-400">عدد القطع:</span>
-            <span className="font-mono text-white font-medium">{cartItems.length}</span>
+      <div className="p-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="font-sans text-[10px] uppercase tracking-luxury text-white/50">القطع</span>
+            <span className="font-numeric text-white text-sm tracking-widest">{cartItems.length}</span>
           </div>
           
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-400">إجمالي الوزن:</span>
-            <span className="font-mono text-white font-medium">{totalWeight.toFixed(2)} جرام</span>
+          <div className="flex justify-between items-center">
+            <span className="font-sans text-[10px] uppercase tracking-luxury text-white/50">الوزن</span>
+            <span className="font-numeric text-white text-sm tracking-widest">{totalWeight.toFixed(2)} G</span>
           </div>
           
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-400">الإجمالي التقديري:</span>
-            <span className="font-mono text-white font-medium">
-              {canEstimate && cartItems.length > 0 ? `${estimatedTotal.toFixed(2)} ج.م` : "-"}
+          <div className="flex justify-between items-center">
+            <span className="font-sans text-[10px] uppercase tracking-luxury text-white/50">المجموع (تقديري)</span>
+            <span className="font-numeric text-white text-sm tracking-widest">
+              {canEstimate && cartItems.length > 0 ? `${estimatedTotal.toFixed(2)} EGP` : "-"}
             </span>
           </div>
 
-          <div className="pt-4 mt-2 border-t border-[#262626] border-dashed flex justify-between items-center">
-            <span className="text-gray-400 font-medium">المدفوع:</span>
-            <span className="font-mono text-white font-bold text-lg">
-              {totalPayments.toFixed(2)} ج.م
+          <div className="pt-3 mt-1 border-t border-white/10 border-dashed flex justify-between items-center">
+            <span className="font-sans text-[10px] uppercase tracking-luxury text-primary">المدفوعات</span>
+            <span className="font-numeric text-primary font-bold text-sm tracking-widest">
+              {totalPayments.toFixed(2)} EGP
             </span>
           </div>
         </div>
 
-        <div className="bg-[#141414] border border-[#262626] rounded-lg p-4 flex justify-between items-center">
-          <span className="text-[#c5a059] font-bold">الصافي للدفع</span>
-          <span className="font-mono text-white font-bold text-2xl tracking-tight">
+        <div className="bg-white/[0.02] border border-white/10 px-3 py-2 flex justify-between items-center">
+          <span className="font-sans text-[10px] uppercase tracking-luxury text-white">المتبقي</span>
+          <span className="font-numeric text-white font-bold text-lg tracking-widest">
             {canEstimate && cartItems.length > 0 ? `${(estimatedTotal - totalPayments).toFixed(2)}` : "-"}
-            <span className="text-sm text-[#c5a059] ml-1">ج.م</span>
+            <span className="font-sans text-[9px] text-white/40 tracking-luxury ml-1">EGP</span>
           </span>
         </div>
+      </div>
 
-        <div className="pt-4">
-          <LuxuryButton 
-            onClick={onCheckout}
-            disabled={!canCheckout || isSubmitting}
-            className="w-full h-14 text-lg font-bold"
-          >
-            {isSubmitting ? (
-              <Loader2 className="w-6 h-6 animate-spin" />
-            ) : (
-              <>
-                <CheckCircle className="w-5 h-5 me-2" />
-                تأكيد وإصدار الفاتورة
-              </>
-            )}
-          </LuxuryButton>
-          
-          {!canCheckout && cartItems.length > 0 && payments.length === 0 && (
-            <p className="text-xs text-red-400 text-center mt-3 bg-red-950/20 py-2 rounded">
-              الرجاء إضافة دفعة واحدة على الأقل لإتمام البيع.
-            </p>
+      <div className="p-4 pt-0 shrink-0 border-t border-primary/20 bg-primary/5">
+        <button 
+          onClick={onCheckout}
+          disabled={!canCheckout || isSubmitting}
+          className="w-full h-12 mt-4 bg-primary text-[#080808] font-sans text-[11px] uppercase tracking-luxury-wide font-bold transition-all duration-300 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
+        >
+          {isSubmitting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            "إصدار الفاتورة"
           )}
-        </div>
+        </button>
+        
+        {!canCheckout && cartItems.length > 0 && payments.length === 0 && (
+          <p className="font-sans text-[9px] uppercase tracking-luxury-wide text-red-400 text-center mt-3">
+            * يرجى إدخال دفعة
+          </p>
+        )}
       </div>
     </div>
   );

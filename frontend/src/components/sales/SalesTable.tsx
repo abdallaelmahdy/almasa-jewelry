@@ -16,7 +16,7 @@ export function SalesTable({
 }) {
   if (isLoading) {
     return (
-      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-xl">
+      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-none">
         <Loader2 className="h-8 w-8 animate-spin mb-4 text-[#c5a059]" />
         <span className="text-gray-400 font-medium">جاري تحميل المبيعات...</span>
       </div>
@@ -25,7 +25,7 @@ export function SalesTable({
 
   if (sales.length === 0) {
     return (
-      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-xl border-dashed">
+      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-none border-dashed">
         <FileX className="h-10 w-10 text-[#262626] mb-4" />
         <span className="text-gray-500 font-medium">لا توجد مبيعات مسجلة.</span>
       </div>
@@ -33,7 +33,7 @@ export function SalesTable({
   }
 
   return (
-    <div className="overflow-x-auto bg-[#0a0a0a] border border-[#262626] rounded-xl">
+      <div className="overflow-x-auto bg-[#0a0a0a] border border-[#262626] rounded-none">
       <table className="w-full text-right border-collapse">
         <thead>
           <tr className="bg-[#141414] border-b border-[#262626] text-gray-400 text-sm">
@@ -61,7 +61,7 @@ export function SalesTable({
                 {sale.customer_id ? (
                   <span className="text-gray-300">رقم {sale.customer_id}</span>
                 ) : (
-                  <span className="text-gray-500 bg-[#141414] px-2 py-1 rounded border border-[#262626] text-xs">عميل نقدي</span>
+                  <span className="text-gray-500 bg-[#141414] px-2 py-1 rounded-none border border-[#262626] text-xs">عميل نقدي</span>
                 )}
               </td>
               <td className="p-4 whitespace-nowrap">
@@ -71,16 +71,16 @@ export function SalesTable({
               </td>
               <td className="p-4 whitespace-nowrap">
                 {sale.status === "COMPLETED" ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#142617] text-[#4ade80] border border-[#4ade80]/20">مكتملة</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-none text-xs font-bold bg-[#142617] text-[#4ade80] border border-[#4ade80]/20">مكتملة</span>
                 ) : sale.status === "REFUNDED" ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#3f1414] text-[#f87171] border border-[#f87171]/20">مسترجعة</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-none text-xs font-bold bg-[#3f1414] text-[#f87171] border border-[#f87171]/20">مسترجعة</span>
                 ) : (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#3b2a0c] text-[#fbbf24] border border-[#fbbf24]/20">{sale.status}</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-none text-xs font-bold bg-[#3b2a0c] text-[#fbbf24] border border-[#fbbf24]/20">{sale.status}</span>
                 )}
               </td>
               <td className="p-4 text-center whitespace-nowrap">
                 <button
-                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-bold text-[#c5a059] bg-[#c5a059]/10 border border-[#c5a059]/20 rounded-md hover:bg-[#c5a059]/20 transition-colors"
+                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-bold text-[#c5a059] bg-[#c5a059]/10 border border-[#c5a059]/20 rounded-none hover:bg-[#c5a059]/20 transition-colors"
                   onClick={() => onView(sale.id)}
                 >
                   <Eye className="w-3.5 h-3.5 me-1.5" />

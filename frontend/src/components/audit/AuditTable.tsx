@@ -24,7 +24,7 @@ export function AuditTable({
 
   if (logs.length === 0) {
     return (
-      <div className="p-12 text-center text-gray-500 bg-[#0a0a0a] min-h-[300px] flex items-center justify-center border border-[#262626] border-dashed rounded-xl m-4">
+      <div className="p-12 text-center text-gray-500 bg-[#0a0a0a] min-h-[300px] flex items-center justify-center border border-[#262626] border-dashed rounded-none m-4">
         لا توجد سجلات مطابقة.
       </div>
     );

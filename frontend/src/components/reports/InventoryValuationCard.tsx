@@ -8,7 +8,7 @@ export function InventoryValuationCard() {
 
   if (isLoading) {
     return (
-      <div className="p-6 rounded-xl border border-[#262626] bg-[#0a0a0a] shadow-sm h-full flex items-center justify-center min-h-[300px]">
+      <div className="p-6 rounded-none border border-[#262626] bg-[#0a0a0a] shadow-sm h-full flex items-center justify-center min-h-[300px]">
         <Loader2 className="w-8 h-8 animate-spin text-[#c5a059]" />
       </div>
     );
@@ -16,17 +16,17 @@ export function InventoryValuationCard() {
 
   if (isError || !valuation) {
     return (
-      <div className="p-6 rounded-xl border border-[#f87171]/20 bg-[#3f1414] text-[#f87171] shadow-sm h-full flex items-center justify-center text-center font-medium">
+      <div className="p-6 rounded-none border border-[#f87171]/20 bg-[#3f1414] text-[#f87171] shadow-sm h-full flex items-center justify-center text-center font-medium">
         تعذر تحميل تقييم المخزون الحالي
       </div>
     );
   }
 
   return (
-    <div className="p-6 rounded-xl border border-[#262626] bg-[#0a0a0a] shadow-sm h-full flex flex-col justify-between">
+    <div className="p-6 rounded-none border border-[#262626] bg-[#0a0a0a] shadow-sm h-full flex flex-col justify-between">
       <div>
         <div className="flex items-center gap-3 mb-6">
-          <div className="bg-[#c5a059]/10 p-2 rounded-lg text-[#c5a059]">
+          <div className="bg-[#c5a059]/10 p-2 rounded-none text-[#c5a059]">
             <Package className="w-5 h-5" />
           </div>
           <h3 className="text-lg font-bold text-white">تقييم المخزون الحالي</h3>
@@ -37,15 +37,15 @@ export function InventoryValuationCard() {
         </p>
 
         <div className="space-y-6">
-          <div className="p-4 border border-[#262626] rounded-lg bg-[#141414]">
+          <div className="p-4 border border-[#262626] rounded-none bg-[#141414]">
             <div className="text-sm text-gray-400 mb-1">إجمالي التكلفة</div>
             <div className="text-3xl font-bold font-mono text-white">
               {Number(valuation.total_cost_basis).toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-lg font-sans text-gray-500">ج.م</span>
             </div>
           </div>
 
-          <div className="p-4 border border-[#262626] rounded-lg bg-[#141414] flex items-center gap-4">
-            <div className="p-3 bg-[#262626] rounded-full">
+          <div className="p-4 border border-[#262626] rounded-none bg-[#141414] flex items-center gap-4">
+            <div className="p-3 bg-[#262626] rounded-none">
               <Scale className="w-6 h-6 text-gray-400" />
             </div>
             <div>

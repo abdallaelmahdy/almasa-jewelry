@@ -33,7 +33,7 @@ test.describe('POS Checkout and Locking', () => {
     await page.click('button[title="إضافة دفعة"]');
     
     // Complete Sale
-    await page.click('button:has-text("تأكيد وإصدار الفاتورة")');
+    await page.click('button:has-text("إصدار الفاتورة")');
 
     // Should see success or the modal
     // The InvoiceModal is rendered upon success. We wait for it.

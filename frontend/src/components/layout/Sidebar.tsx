@@ -34,19 +34,20 @@ export function Sidebar() {
   const filteredNav = navigation.filter((item) => item.roles.includes(user.role));
 
   return (
-    <div className="hidden md:flex flex-col w-64 bg-[#0a0a0a] border-l border-[#262626] h-full text-white shadow-[4px_0_24px_rgba(0,0,0,0.5)] z-40 relative">
-      <div className="flex h-[72px] items-center justify-center px-4 border-b border-[#262626]">
-        <Link href="/" className="flex items-center gap-2 group">
-          <Diamond className="w-7 h-7 text-[#c5a059] group-hover:scale-110 transition-transform duration-500" />
+    <div className="hidden md:flex flex-col w-64 bg-background border-l border-white/5 h-full text-white z-40 relative">
+      <div className="flex h-20 items-center justify-center px-4 border-b border-white/5">
+        <Link href="/dashboard" className="flex items-center gap-3 group">
+          <Diamond className="w-6 h-6 text-primary group-hover:scale-110 transition-transform duration-700" />
           <div className="flex flex-col items-start">
-            <span className="text-xl font-bold tracking-tight text-white leading-none">ألماسة</span>
-            <span className="text-[9px] uppercase tracking-[0.2em] text-[#c5a059] leading-none mt-1">للمجوهرات</span>
+            <span className="font-display text-xl text-white leading-none">الماسة</span>
+            <span className="font-sans text-[8px] uppercase tracking-luxury text-primary leading-none mt-1.5">للمجوهرات</span>
           </div>
         </Link>
       </div>
       
-      <div className="flex-1 overflow-y-auto py-6">
-        <nav className="space-y-1.5 px-3">
+      <div className="flex-1 overflow-y-auto py-8">
+        <nav className="space-y-1 px-4">
+          <span className="font-sans text-[9px] uppercase tracking-luxury-wide text-muted-foreground px-3 mb-4 block">القائمة الرئيسية</span>
           {filteredNav.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
             
@@ -55,19 +56,19 @@ export function Sidebar() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "group flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-all duration-300 relative overflow-hidden",
+                  "group flex items-center px-3 py-3 text-xs font-sans rounded-none transition-colors duration-500 relative",
                   isActive
-                    ? "bg-[#141414] text-white shadow-sm border border-[#262626]"
-                    : "text-gray-400 hover:bg-[#141414] hover:text-white border border-transparent"
+                    ? "bg-white/[0.03] text-white"
+                    : "text-white/60 hover:bg-white/[0.02] hover:text-white"
                 )}
               >
                 {isActive && (
-                  <div className="absolute right-0 top-0 bottom-0 w-1 bg-[#c5a059] rounded-r-md shadow-[0_0_8px_rgba(197,160,89,0.5)]" />
+                  <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-primary" />
                 )}
                 <item.icon
                   className={cn(
-                    "me-3 flex-shrink-0 h-5 w-5 transition-colors duration-300",
-                    isActive ? "text-[#c5a059]" : "text-gray-500 group-hover:text-[#c5a059]"
+                    "me-4 flex-shrink-0 h-4 w-4 transition-colors duration-500",
+                    isActive ? "text-primary" : "text-white/40 group-hover:text-primary/70"
                   )}
                   aria-hidden="true"
                 />
@@ -78,12 +79,12 @@ export function Sidebar() {
         </nav>
       </div>
       
-      <div className="p-4 border-t border-[#262626] bg-[#0d0d0d]">
-        <div className="flex flex-col gap-1 px-2 py-1">
-          <span className="text-sm font-bold text-white truncate">{user.username}</span>
-          <span className="text-xs text-gray-400 truncate">{user.email}</span>
+      <div className="p-4 border-t border-white/5 bg-secondary/10">
+        <div className="flex flex-col gap-1.5 px-3 py-2">
+          <span className="font-sans text-xs font-bold text-white truncate">{user.username}</span>
+          <span className="font-numeric text-[10px] text-muted-foreground tracking-wider truncate">{user.email}</span>
           <div className="mt-2 flex">
-            <span className="text-[10px] font-medium text-[#0d0d0d] bg-[#c5a059] px-2.5 py-0.5 rounded-sm tracking-wide">
+            <span className="font-sans text-[9px] uppercase tracking-luxury font-medium text-background bg-primary px-2 py-0.5">
               {user.role === "admin" ? "مدير النظام" : "موظف مبيعات"}
             </span>
           </div>

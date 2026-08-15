@@ -38,11 +38,11 @@ export function Header() {
   };
 
   return (
-    <header className="flex h-[72px] shrink-0 items-center gap-x-4 border-b border-[#262626] bg-[#0a0a0a] px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 z-30">
+    <header className="flex h-20 shrink-0 items-center gap-x-4 border-b border-white/5 bg-background px-4 sm:gap-x-6 sm:px-6 lg:px-8 z-30">
       {/* Mobile menu button */}
       <button 
         type="button" 
-        className="-m-2.5 p-2.5 text-gray-400 hover:text-white md:hidden"
+        className="-m-2.5 p-2.5 text-white/50 hover:text-white md:hidden transition-colors"
         onClick={() => setIsMobileMenuOpen(true)}
       >
         <span className="sr-only">فتح القائمة</span>
@@ -50,28 +50,30 @@ export function Header() {
       </button>
 
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6 items-center">
-        <div className="flex flex-1">
-          {/* Breadcrumbs or page title could go here later */}
+        <div className="flex flex-1 items-center">
+          <span className="hidden md:block font-sans text-[10px] uppercase tracking-luxury text-muted-foreground">
+            {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </span>
         </div>
         
         <div className="flex items-center gap-x-4 lg:gap-x-6">
           <button 
             type="button" 
-            className="-m-2.5 p-2.5 text-gray-400 hover:text-white relative"
+            className="-m-2.5 p-2.5 text-white/50 hover:text-white relative transition-colors"
           >
             <span className="sr-only">الإشعارات</span>
-            <Bell className="h-5 w-5" aria-hidden="true" />
-            <span className="absolute top-2 right-2.5 block h-2 w-2 rounded-full bg-[#c5a059] ring-2 ring-[#0a0a0a]" />
+            <Bell className="h-4 w-4" aria-hidden="true" />
+            <span className="absolute top-2.5 right-3 block h-1.5 w-1.5 rounded-full bg-primary ring-2 ring-background animate-pulse" />
           </button>
 
-          <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-[#262626]" aria-hidden="true" />
+          <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-white/10" aria-hidden="true" />
 
           <button 
             onClick={handleLogout} 
-            className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-[#c5a059] transition-colors duration-200"
+            className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-luxury font-medium text-white/50 hover:text-primary transition-colors duration-500"
           >
             تسجيل الخروج
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -79,24 +81,25 @@ export function Header() {
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden">
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-[#0a0a0a] border-l border-[#262626] shadow-2xl overflow-y-auto transform transition-transform duration-300">
-            <div className="flex h-16 shrink-0 items-center justify-between px-4 border-b border-[#262626]">
-              <Link href="/" className="flex items-center gap-2 group" onClick={() => setIsMobileMenuOpen(false)}>
-                <Diamond className="w-6 h-6 text-[#c5a059]" />
-                <span className="text-lg font-bold text-white">ألماسة</span>
+          <div className="fixed inset-0 bg-[#080808]/90 backdrop-blur-md" onClick={() => setIsMobileMenuOpen(false)} />
+          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-background border-l border-white/5 shadow-2xl overflow-y-auto transform transition-transform duration-500">
+            <div className="flex h-20 shrink-0 items-center justify-between px-6 border-b border-white/5">
+              <Link href="/dashboard" className="flex items-center gap-3 group" onClick={() => setIsMobileMenuOpen(false)}>
+                <Diamond className="w-5 h-5 text-primary" />
+                <span className="font-display text-xl text-white">الماسة</span>
               </Link>
               <button
                 type="button"
-                className="text-gray-400 hover:text-white"
+                className="text-white/50 hover:text-white transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <span className="sr-only">إغلاق القائمة</span>
-                <X className="h-6 w-6" aria-hidden="true" />
+                <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
             
-            <nav className="flex-1 space-y-1 px-3 py-4">
+            <nav className="flex-1 space-y-2 px-4 py-8">
+              <span className="font-sans text-[9px] uppercase tracking-luxury-wide text-muted-foreground px-3 mb-6 block">القائمة الرئيسية</span>
               {filteredNav.map((item) => {
                 const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
                 return (
@@ -105,16 +108,19 @@ export function Header() {
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
-                      "group flex items-center px-3 py-3 text-base font-medium rounded-md",
+                      "group flex items-center px-4 py-4 font-sans text-xs transition-colors duration-500 relative",
                       isActive
-                        ? "bg-[#141414] text-white border border-[#262626]"
-                        : "text-gray-400 hover:bg-[#141414] hover:text-white"
+                        ? "bg-white/[0.03] text-white"
+                        : "text-white/60 hover:bg-white/[0.02] hover:text-white"
                     )}
                   >
+                    {isActive && (
+                      <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-primary" />
+                    )}
                     <item.icon
                       className={cn(
-                        "me-4 h-5 w-5 shrink-0",
-                        isActive ? "text-[#c5a059]" : "text-gray-500"
+                        "me-4 h-4 w-4 shrink-0 transition-colors duration-500",
+                        isActive ? "text-primary" : "text-white/40"
                       )}
                     />
                     {item.name}
@@ -124,10 +130,10 @@ export function Header() {
             </nav>
             
             {user && (
-              <div className="p-4 border-t border-[#262626] bg-[#0d0d0d]">
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-bold text-white">{user.username}</span>
-                  <span className="text-xs text-gray-400">{user.email}</span>
+              <div className="p-6 border-t border-white/5 bg-secondary/10">
+                <div className="flex flex-col gap-1.5">
+                  <span className="font-sans text-xs font-bold text-white">{user.username}</span>
+                  <span className="font-numeric text-[10px] text-muted-foreground tracking-wider">{user.email}</span>
                 </div>
               </div>
             )}

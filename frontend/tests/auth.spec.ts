@@ -15,7 +15,7 @@ test.describe('Authentication and RBAC', () => {
     await expect(page).toHaveURL('/login');
   });
 
-  test('Valid login redirects to POS for employee', async ({ page }) => {
+  test('Valid login redirects to dashboard for employee', async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
     await page.fill('input[name="username"]', 'employee@test.com');

@@ -28,7 +28,7 @@ export function ReportDateRange({
   };
 
   return (
-    <div className="flex items-center gap-2 bg-[#141414] border border-[#262626] p-2 rounded-xl shadow-sm">
+    <div className="flex items-center gap-2 bg-[#141414] border border-[#262626] p-2 rounded-none shadow-sm">
       <div className="flex items-center gap-2">
         <span className="text-sm text-gray-400 ms-2 font-medium">من</span>
         <input 

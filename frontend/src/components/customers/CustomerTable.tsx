@@ -16,7 +16,7 @@ export function CustomerTable({
 }) {
   if (isLoading) {
     return (
-      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-xl">
+      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-none">
         <Loader2 className="h-8 w-8 animate-spin mb-4 text-[#c5a059]" />
         <span className="text-gray-400 font-medium">جاري تحميل العملاء...</span>
       </div>
@@ -25,7 +25,7 @@ export function CustomerTable({
 
   if (customers.length === 0) {
     return (
-      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-xl border-dashed">
+      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-none border-dashed">
         <Users className="h-10 w-10 text-[#262626] mb-4" />
         <span className="text-gray-500 font-medium">لا يوجد عملاء مطابقين للبحث.</span>
       </div>
@@ -33,7 +33,7 @@ export function CustomerTable({
   }
 
   return (
-    <div className="overflow-x-auto bg-[#0a0a0a] border border-[#262626] rounded-xl">
+    <div className="overflow-x-auto bg-[#0a0a0a] border border-[#262626] rounded-none">
       <table className="w-full text-right border-collapse">
         <thead>
           <tr className="bg-[#141414] border-b border-[#262626] text-gray-400 text-sm">
@@ -59,7 +59,7 @@ export function CustomerTable({
               </td>
               <td className="p-4 text-center whitespace-nowrap">
                 <button
-                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-bold text-[#c5a059] bg-[#c5a059]/10 border border-[#c5a059]/20 rounded-md hover:bg-[#c5a059]/20 transition-colors"
+                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-bold text-[#c5a059] bg-[#c5a059]/10 border border-[#c5a059]/20 rounded-none hover:bg-[#c5a059]/20 transition-colors"
                   onClick={() => onEdit(customer.id)}
                 >
                   <Edit2 className="w-3.5 h-3.5 me-1.5" />

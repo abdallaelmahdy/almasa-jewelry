@@ -19,29 +19,76 @@ export function ProductImageFallback({
 }: ProductImageFallbackProps) {
   const [error, setError] = useState(false);
 
-  // Use reliable Unsplash placeholders based on category if no src is provided or image errors out
-  const getPlaceholder = (cat?: string) => {
+  // Deterministically select an image based on the alt text string length or character sum
+  const getHash = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash);
+  };
+
+  const getPlaceholder = (cat?: string, altText: string = "") => {
+    const hash = getHash(altText);
+    let options: string[] = [];
     switch (cat) {
       case "خواتم":
       case "Rings":
-        return "https://images.unsplash.com/photo-1605100804763-247f67b2548e?auto=format&fit=crop&q=80&w=600";
+        options = [
+          "https://images.unsplash.com/photo-1605100804763-247f67b2548e?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1596944924616-7b38e7cfac36?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&q=80&w=600"
+        ];
+        break;
       case "سلاسل":
       case "Necklaces":
-        return "https://images.unsplash.com/photo-1599643478524-fb52445cbf31?auto=format&fit=crop&q=80&w=600";
+        options = [
+          "https://images.unsplash.com/photo-1599643478524-fb52445cbf31?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1535632787350-4e68ef0ac584?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=600"
+        ];
+        break;
       case "حلقان":
       case "Earrings":
-        return "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&q=80&w=600";
+        options = [
+          "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1635314785675-430c50d535ec?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&q=80&w=600"
+        ];
+        break;
       case "غوايش":
+      case "أساور":
       case "Bracelets":
-        // Bracelet placeholder
-        return "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&q=80&w=600";
+        options = [
+          "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1573408301145-b98c4af06b8f?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1598560917505-59a3ad559071?auto=format&fit=crop&q=80&w=600"
+        ];
+        break;
+      case "سبائك":
+      case "Bullion":
+        options = [
+          "https://images.unsplash.com/photo-1621528657682-1c258d46db1d?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1599839619722-39751411ea63?auto=format&fit=crop&q=80&w=600"
+        ];
+        break;
+      case "أطقم":
+      case "Sets":
+        options = [
+          "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=600"
+        ];
+        break;
       default:
-        // Generic jewelry placeholder
-        return "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=600";
+        options = [
+          "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=600",
+          "https://images.unsplash.com/photo-1605100804763-247f67b2548e?auto=format&fit=crop&q=80&w=600"
+        ];
     }
+    return options[hash % options.length];
   };
 
-  const finalSrc = error || !src ? getPlaceholder(category) : src;
+  const finalSrc = error || !src ? getPlaceholder(category, alt) : src;
 
   return (
     <div className={cn("relative overflow-hidden bg-background/50", className)}>

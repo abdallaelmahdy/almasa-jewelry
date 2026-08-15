@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuthStore } from "@/stores/authStore";
 import { usePOSStore } from "@/stores/posStore";
 import { useCheckout } from "@/hooks/usePOS";
 import { POSInventorySelector } from "@/components/pos/POSInventorySelector";
@@ -13,6 +14,7 @@ import { ShoppingBag, Box, UserSquare2, Wallet } from "lucide-react";
 import { LuxuryCard, LuxuryCardContent, LuxuryCardHeader, LuxuryCardTitle } from "@/components/luxury/LuxuryCard";
 
 export default function POSPage() {
+  const { user } = useAuthStore();
   const { 
     cartItems, 
     customerId, 
@@ -41,17 +43,15 @@ export default function POSPage() {
           method: p.method,
           amount: parseFloat(p.amount.toString()),
         })),
-        idempotency_key: idempotencyKey, // Crucial: maintains idempotency on network retry
+        idempotency_key: idempotencyKey, 
       };
 
       const sale = await checkoutMutation.mutateAsync(payload);
       
-      // On success, backend accepted it or returned the existing sale for this idempotency key
       setCompletedSale(sale);
       clearCart();
     } catch (err: any) {
       if (err?.response?.status === 409) {
-        // Idempotency conflict or inventory lock conflict from another user
         setErrorMsg(`خطأ تعارض: ${err?.response?.data?.detail || "تم إجراء هذه العملية مسبقاً أو القطعة مباعة."}`);
       } else {
         setErrorMsg(`فشل إتمام البيع: ${err?.response?.data?.detail || "تأكد من الاتصال بالخادم وحاول مجدداً."}`);
@@ -60,80 +60,76 @@ export default function POSPage() {
   };
 
   return (
-    <div className="space-y-8 p-4 md:p-8">
-      <div className="flex items-center gap-4">
-        <div className="bg-[#141414] p-4 rounded-xl border border-[#c5a059]/30 text-[#c5a059] shadow-[0_0_20px_rgba(197,160,89,0.1)]">
-          <ShoppingBag className="w-8 h-8" />
+    <div className="flex flex-col h-[calc(100vh-80px)] max-w-[1920px] mx-auto px-4 py-4 gap-4 bg-background">
+      <div className="flex items-center justify-between pb-4 border-b border-white/10 shrink-0">
+        <div className="flex items-center gap-4">
+          <h2 className="font-display text-2xl text-white tracking-wide">نقطة البيع</h2>
+          <span className="h-4 w-px bg-white/20"></span>
+          <span className="font-sans text-[10px] text-white/50 uppercase tracking-luxury-wide">
+            ALMASA POS TERMINAL
+          </span>
         </div>
-        <div>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">نقطة البيع (POS)</h2>
-          <p className="text-gray-400 mt-2">
-            إدارة سلة المشتريات، إضافة العملاء، وإصدار الفواتير.
-          </p>
+        <div className="font-numeric text-sm tracking-widest text-primary/80">
+          Terminal ID: {user?.username?.toUpperCase() || "SYS"} / 01
         </div>
       </div>
 
       {errorMsg && (
-        <div className="p-4 bg-red-950/50 text-red-400 border border-red-900/50 rounded-xl text-lg font-bold text-center shadow-lg">
+        <div className="shrink-0 p-3 bg-red-950/40 text-red-400 border border-red-500/50 text-xs font-sans tracking-wide">
           {errorMsg}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4">
         {/* Left/Main Column: Cart & Items */}
-        <div className="lg:col-span-7 xl:col-span-8 space-y-8">
-          <LuxuryCard className="bg-[#0d0d0d] border-[#262626]">
-            <LuxuryCardHeader className="border-b border-[#262626] pb-4">
-              <LuxuryCardTitle className="flex items-center gap-2 text-white">
-                <Box className="w-5 h-5 text-[#c5a059]" />
-                1. اختيار القطع
-              </LuxuryCardTitle>
-            </LuxuryCardHeader>
-            <LuxuryCardContent className="pt-6">
+        <div className="flex-[2] min-w-0 flex flex-col gap-4 h-full">
+          {/* Inventory Selection */}
+          <div className="flex-[2] min-h-0 flex flex-col border border-white/10 bg-black/20">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-white/[0.02]">
+              <Box className="w-3.5 h-3.5 text-primary" />
+              <span className="font-sans text-[11px] text-white uppercase tracking-luxury-wide">1. اختيار القطع</span>
+            </div>
+            <div className="flex-1 overflow-auto p-4 custom-scrollbar">
               <POSInventorySelector />
-            </LuxuryCardContent>
-          </LuxuryCard>
+            </div>
+          </div>
 
-          <LuxuryCard className="bg-[#0d0d0d] border-[#262626]">
-            <LuxuryCardHeader className="border-b border-[#262626] pb-4">
-              <LuxuryCardTitle className="flex items-center gap-2 text-white">
-                <ShoppingBag className="w-5 h-5 text-[#c5a059]" />
-                سلة المشتريات
-              </LuxuryCardTitle>
-            </LuxuryCardHeader>
-            <LuxuryCardContent className="pt-6">
+          {/* Cart */}
+          <div className="flex-[1] min-h-0 flex flex-col border border-white/10 bg-black/20">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-white/[0.02]">
+              <ShoppingBag className="w-3.5 h-3.5 text-primary" />
+              <span className="font-sans text-[11px] text-white uppercase tracking-luxury-wide">سلة المشتريات</span>
+            </div>
+            <div className="flex-1 overflow-auto p-4 custom-scrollbar">
               <POSCart />
-            </LuxuryCardContent>
-          </LuxuryCard>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Customer, Payment & Summary */}
-        <div className="lg:col-span-5 xl:col-span-4 space-y-8">
-          <div className="sticky top-6 space-y-8">
-            <LuxuryCard className="bg-[#0d0d0d] border-[#262626]">
-              <LuxuryCardHeader className="border-b border-[#262626] pb-4">
-                <LuxuryCardTitle className="flex items-center gap-2 text-white text-lg">
-                  <UserSquare2 className="w-5 h-5 text-[#c5a059]" />
-                  2. ربط العميل (اختياري)
-                </LuxuryCardTitle>
-              </LuxuryCardHeader>
-              <LuxuryCardContent className="pt-6">
-                <POSCustomerSelector />
-              </LuxuryCardContent>
-            </LuxuryCard>
+        <div className="flex-[1] min-w-0 lg:max-w-[450px] flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar">
+          
+          <div className="flex flex-col border border-white/10 bg-black/20 shrink-0">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-white/[0.02]">
+              <UserSquare2 className="w-3.5 h-3.5 text-primary" />
+              <span className="font-sans text-[11px] text-white uppercase tracking-luxury-wide">2. ربط العميل (اختياري)</span>
+            </div>
+            <div className="p-4">
+              <POSCustomerSelector />
+            </div>
+          </div>
 
-            <LuxuryCard className="bg-[#0d0d0d] border-[#262626]">
-              <LuxuryCardHeader className="border-b border-[#262626] pb-4">
-                <LuxuryCardTitle className="flex items-center gap-2 text-white text-lg">
-                  <Wallet className="w-5 h-5 text-[#c5a059]" />
-                  3. تسجيل الدفعات
-                </LuxuryCardTitle>
-              </LuxuryCardHeader>
-              <LuxuryCardContent className="pt-6">
-                <POSPaymentForm />
-              </LuxuryCardContent>
-            </LuxuryCard>
+          <div className="flex flex-col border border-white/10 bg-black/20 shrink-0">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-white/[0.02]">
+              <Wallet className="w-3.5 h-3.5 text-primary" />
+              <span className="font-sans text-[11px] text-white uppercase tracking-luxury-wide">3. تسجيل الدفعات</span>
+            </div>
+            <div className="p-4">
+              <POSPaymentForm />
+            </div>
+          </div>
 
+          <div className="mt-auto shrink-0 border border-primary/20 bg-primary/5">
             <POSSummary 
               onCheckout={handleCheckout} 
               isSubmitting={checkoutMutation.isPending} 

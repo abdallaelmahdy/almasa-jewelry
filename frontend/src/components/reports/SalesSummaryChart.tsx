@@ -18,7 +18,7 @@ export function SalesSummaryChart({ dateFrom, dateTo }: { dateFrom: string; date
 
   if (isLoading) {
     return (
-      <div className="p-6 rounded-xl border border-[#262626] bg-[#0a0a0a] shadow-sm h-[400px] flex items-center justify-center">
+      <div className="p-6 rounded-none border border-[#262626] bg-[#0a0a0a] shadow-sm h-[400px] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#c5a059]" />
       </div>
     );
@@ -26,7 +26,7 @@ export function SalesSummaryChart({ dateFrom, dateTo }: { dateFrom: string; date
 
   if (isError || !summary) {
     return (
-      <div className="p-6 rounded-xl border border-[#f87171]/20 bg-[#3f1414] text-[#f87171] shadow-sm h-[400px] flex items-center justify-center text-center font-medium">
+      <div className="p-6 rounded-none border border-[#f87171]/20 bg-[#3f1414] text-[#f87171] shadow-sm h-[400px] flex items-center justify-center text-center font-medium">
         تعذر تحميل المخطط البياني
       </div>
     );
@@ -43,7 +43,7 @@ export function SalesSummaryChart({ dateFrom, dateTo }: { dateFrom: string; date
   ];
 
   return (
-    <div className="p-6 rounded-xl border border-[#262626] bg-[#0a0a0a] shadow-sm h-[400px] flex flex-col" dir="ltr">
+    <div className="p-6 rounded-none border border-[#262626] bg-[#0a0a0a] shadow-sm h-[400px] flex flex-col" dir="ltr">
       <h3 className="text-lg font-bold mb-6 text-right w-full text-white" dir="rtl">مخطط الأداء المالي</h3>
       <div className="flex-1 min-h-0 w-full">
         <ResponsiveContainer width="100%" height="100%">

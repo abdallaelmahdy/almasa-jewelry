@@ -67,7 +67,7 @@ export function InventoryTable({
 
   if (isLoading) {
     return (
-      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-xl">
+      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-none">
         <Loader2 className="h-8 w-8 animate-spin mb-4 text-[#c5a059]" />
         <span className="text-gray-400 font-medium">جاري تحميل المخزون...</span>
       </div>
@@ -76,7 +76,7 @@ export function InventoryTable({
 
   if (items.length === 0) {
     return (
-      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-xl border-dashed">
+      <div className="p-12 text-center flex flex-col items-center justify-center bg-[#0a0a0a] border border-[#262626] rounded-none border-dashed">
         <Key className="h-10 w-10 text-[#262626] mb-4" />
         <span className="text-gray-500 font-medium">لا توجد قطع مطابقة للبحث.</span>
       </div>
@@ -84,7 +84,7 @@ export function InventoryTable({
   }
 
   return (
-    <div className="overflow-x-auto bg-[#0a0a0a] border border-[#262626] rounded-xl">
+    <div className="overflow-x-auto bg-[#0a0a0a] border border-[#262626] rounded-none">
       <table className="w-full text-right border-collapse">
         <thead>
           <tr className="bg-[#141414] border-b border-[#262626] text-gray-400 text-sm">
@@ -139,7 +139,7 @@ export function InventoryTable({
                   <div className="flex items-center justify-center gap-2">
                     {canLock && (
                       <button
-                        className="flex items-center justify-center px-3 py-1.5 text-xs font-bold text-[#fbbf24] bg-[#fbbf24]/10 border border-[#fbbf24]/20 rounded-md hover:bg-[#fbbf24]/20 transition-colors disabled:opacity-50"
+                        className="flex items-center justify-center px-3 py-1.5 text-xs font-bold text-[#fbbf24] bg-[#fbbf24]/10 border border-[#fbbf24]/20 rounded-none hover:bg-[#fbbf24]/20 transition-colors disabled:opacity-50"
                         onClick={() => handleLock(item.id)}
                         disabled={isOperating}
                       >
@@ -149,7 +149,7 @@ export function InventoryTable({
                     )}
                     {canUnlock && (
                       <button
-                        className="flex items-center justify-center px-3 py-1.5 text-xs font-bold text-[#4ade80] bg-[#4ade80]/10 border border-[#4ade80]/20 rounded-md hover:bg-[#4ade80]/20 transition-colors disabled:opacity-50"
+                        className="flex items-center justify-center px-3 py-1.5 text-xs font-bold text-[#4ade80] bg-[#4ade80]/10 border border-[#4ade80]/20 rounded-none hover:bg-[#4ade80]/20 transition-colors disabled:opacity-50"
                         onClick={() => handleUnlock(item.id)}
                         disabled={isOperating}
                       >

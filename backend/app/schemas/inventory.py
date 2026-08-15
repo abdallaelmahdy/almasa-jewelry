@@ -66,6 +66,22 @@ class InventoryItemOut(InventoryItemInDBBase):
             return str(v)
         return str(v)
 
+class PublicInventoryItemOut(BaseModel):
+    id: UUID
+    sku: str
+    status: ItemStatus
+    weight: str
+    karat: int
+    product: ProductOut
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator('weight', mode='before')
+    @classmethod
+    def serialize_decimal(cls, v):
+        if isinstance(v, Decimal):
+            return str(v)
+        return str(v)
+
 class InventoryTransactionBase(BaseModel):
     transaction_type: TransactionType
     previous_status: Optional[ItemStatus]

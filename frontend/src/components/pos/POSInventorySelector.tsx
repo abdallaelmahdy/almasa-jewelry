@@ -5,8 +5,6 @@ import { useInventory, useLockInventory } from "@/hooks/useInventory";
 import { usePOSStore } from "@/stores/posStore";
 import { InventoryItemOut } from "@/types/inventory";
 import { Loader2, Search, Plus } from "lucide-react";
-import { ProductImageFallback } from "@/components/ui/ProductImageFallback";
-import { LuxuryButton } from "@/components/luxury/LuxuryButton";
 
 export function POSInventorySelector() {
   const [skuQuery, setSkuQuery] = useState("");
@@ -42,14 +40,11 @@ export function POSInventorySelector() {
     setLockingId(item.id);
     setErrorMsg(null);
     try {
-      // 1. Lock the inventory item
       const lockedItem = await lockMutation.mutateAsync({
         id: item.id,
         payload: { reason: "POS_CHECKOUT", reference_type: "POS_CART" },
       });
-      // 2. Add to local cart ONLY after successful lock
       addItem(lockedItem);
-      // Reset search
       setSkuQuery("");
       setDebouncedSku("");
     } catch (err: any) {
@@ -66,84 +61,66 @@ export function POSInventorySelector() {
   return (
     <div className="space-y-6">
       <div className="relative group">
-        <Search className="absolute right-4 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-[#c5a059] transition-colors" />
+        <Search className="absolute right-4 top-3.5 h-4 w-4 text-white/30 group-focus-within:text-primary transition-colors" />
         <input
           placeholder="ابحث برقم القطعة (SKU) لإضافتها للسلة..."
           value={skuQuery}
           onChange={(e) => handleSearch(e.target.value)}
-          className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-12 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all font-mono"
+          className="w-full bg-white/[0.01] border-b border-white/10 py-3 px-10 text-white placeholder-white/30 focus:outline-none focus:border-primary focus:bg-white/[0.02] transition-all font-numeric tracking-widest rounded-none"
           dir="ltr"
         />
       </div>
 
       {errorMsg && (
-        <div className="p-4 text-sm bg-red-950/50 text-red-400 border border-red-900/50 rounded-xl">
+        <div className="p-4 text-[10px] uppercase font-sans tracking-luxury bg-red-950/20 text-red-500 border-l-2 border-red-500">
           {errorMsg}
         </div>
       )}
 
       {debouncedSku && isLoading && (
         <div className="flex items-center justify-center p-8">
-          <Loader2 className="w-8 h-8 animate-spin text-[#c5a059]" />
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
       )}
 
       {debouncedSku && !isLoading && results && results.length === 0 && (
-        <div className="text-sm text-gray-500 p-8 text-center border border-[#262626] border-dashed rounded-xl bg-[#0a0a0a]">
-          لا توجد قطع متاحة مطابقة لهذا الرقم.
+        <div className="font-sans text-[10px] uppercase tracking-luxury text-white/30 p-8 text-center border border-white/5 border-dashed bg-white/[0.01]">
+          لا توجد قطع متاحة
         </div>
       )}
 
       {debouncedSku && !isLoading && results && results.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-0 border-t border-white/10">
           {results.map((item) => (
             <div 
               key={item.id} 
-              className="group relative bg-[#141414] border border-[#262626] rounded-xl overflow-hidden hover:border-[#c5a059]/30 transition-all flex flex-col"
+              className="group relative bg-transparent border-b border-white/5 hover:bg-white/[0.02] transition-colors flex justify-between items-center p-3"
             >
-              <div className="relative h-40 bg-[#0a0a0a]">
-                <ProductImageFallback
-                  category="مجوهرات"
-                  alt={item.product.name}
-                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#141414] to-transparent"></div>
-                <div className="absolute top-3 right-3">
-                  <span className="bg-[#c5a059] text-[#0d0d0d] text-xs font-bold px-2 py-1 rounded-sm shadow-sm">
-                    {item.karat} قيراط
-                  </span>
-                </div>
-                <div className="absolute bottom-3 left-4 right-4">
-                  <div className="font-mono font-bold text-white text-lg drop-shadow-md">{item.sku}</div>
+              <div className="flex flex-col gap-1">
+                <div className="font-numeric font-bold text-white tracking-widest">{item.sku}</div>
+                <div className="font-sans text-[10px] text-muted-foreground tracking-wide line-clamp-1">{item.product.name}</div>
+                <div className="text-xs flex gap-3 text-white/50 font-medium mt-1">
+                  <span className="font-sans text-[9px] uppercase tracking-luxury">الوزن: <span className="font-numeric text-primary tracking-widest ml-1">{item.weight}G</span></span>
+                  <span className="font-sans text-[9px] uppercase tracking-luxury">العيار: <span className="font-numeric text-primary tracking-widest ml-1">{item.karat}</span></span>
                 </div>
               </div>
               
-              <div className="p-4 flex-1 flex flex-col justify-between gap-4">
-                <div>
-                  <h4 className="text-white font-medium text-sm line-clamp-1">{item.product.name}</h4>
-                  <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
-                    <span>الوزن: <span className="font-mono text-[#c5a059]">{item.weight}g</span></span>
-                    <span>الفئة: مجوهرات</span>
-                  </div>
-                </div>
-                
-                <LuxuryButton
-                  onClick={() => handleAdd(item)}
-                  disabled={lockingId === item.id || cartItems.some(i => i.id === item.id)}
-                  className="w-full py-2 h-auto text-sm"
-                >
-                  {lockingId === item.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : cartItems.some(i => i.id === item.id) ? (
-                    "في السلة"
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4 me-2" />
-                      إضافة للسلة
-                    </>
-                  )}
-                </LuxuryButton>
-              </div>
+              <button
+                onClick={() => handleAdd(item)}
+                disabled={lockingId === item.id || cartItems.some(i => i.id === item.id)}
+                className="bg-white/[0.05] hover:bg-primary hover:text-black text-white/70 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-white/10 px-4 py-2 flex items-center justify-center rounded-none font-sans text-[10px] uppercase tracking-luxury min-w-[100px]"
+              >
+                {lockingId === item.id ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : cartItems.some(i => i.id === item.id) ? (
+                  "في السلة"
+                ) : (
+                  <>
+                    <Plus className="w-3 h-3 me-2" />
+                    إضافة
+                  </>
+                )}
+              </button>
             </div>
           ))}
         </div>

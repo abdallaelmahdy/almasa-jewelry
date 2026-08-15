@@ -131,7 +131,7 @@ export function CustomerFormModal({
                 <input 
                   placeholder="الاسم الكامل للعميل" 
                   {...form.register("name")} 
-                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-none py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all"
                 />
                 {form.formState.errors.name && (
                   <p className="text-red-400 text-xs mt-1">{form.formState.errors.name.message as string}</p>
@@ -144,7 +144,7 @@ export function CustomerFormModal({
                   placeholder="مثال: 0501234567" 
                   {...form.register("phone")} 
                   dir="ltr" 
-                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all font-mono text-left"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-none py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all font-mono text-left"
                 />
                 {form.formState.errors.phone && (
                   <p className="text-red-400 text-xs mt-1">{form.formState.errors.phone.message as string}</p>
@@ -157,7 +157,7 @@ export function CustomerFormModal({
                   placeholder="email@example.com" 
                   {...form.register("email")} 
                   dir="ltr" 
-                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all font-mono text-left"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-none py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all font-mono text-left"
                 />
                 {form.formState.errors.email && (
                   <p className="text-red-400 text-xs mt-1">{form.formState.errors.email.message as string}</p>
@@ -170,12 +170,12 @@ export function CustomerFormModal({
                   placeholder="ملاحظات إضافية عن العميل (اختياري)" 
                   {...form.register("notes")} 
                   rows={3}
-                  className="w-full bg-[#141414] border border-[#262626] rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all resize-none"
+                  className="w-full bg-[#141414] border border-[#262626] rounded-none py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#c5a059]/50 focus:ring-1 focus:ring-[#c5a059]/50 transition-all resize-none"
                 />
               </div>
 
               {errorMsg && (
-                <div className="p-4 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded-xl text-center">
+                <div className="p-4 bg-red-950/50 border border-red-900 text-red-400 text-sm rounded-none text-center">
                   {errorMsg}
                 </div>
               )}
@@ -185,7 +185,7 @@ export function CustomerFormModal({
                   type="button" 
                   onClick={onClose} 
                   disabled={isPending}
-                  className="px-6 py-2.5 rounded-xl border border-[#262626] text-gray-400 hover:text-white hover:bg-[#262626] transition-colors"
+                  className="px-6 py-2.5 rounded-none border border-[#262626] text-gray-400 hover:text-white hover:bg-[#262626] transition-colors"
                 >
                   إلغاء
                 </button>

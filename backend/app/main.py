@@ -4,11 +4,21 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import health, auth, users, categories, products, gold_prices, pricing, inventory, sales, customers, reports, audit
+from app.api.v1 import (
+    auth, users, categories, products,
+    gold_prices, inventory, sales,
+    customers, reports, audit,
+    pricing, health, public_catalog
+)
 from app.core.config import settings
 from app.core.rate_limit import limiter
 
-app = FastAPI(title="Almasa Jewelry API", version="1.0.0")
+app = FastAPI(
+    title="Almasa Jewelry API",
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    docs_url=f"{settings.API_V1_STR}/docs",
+    redoc_url=f"{settings.API_V1_STR}/redoc",
+)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -23,6 +33,7 @@ app.add_middleware(
 # Routers
 app.include_router(health.router, prefix=f"{settings.API_V1_STR}/health", tags=["health"])
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
+app.include_router(public_catalog.router, prefix=f"{settings.API_V1_STR}/public_catalog", tags=["Public Catalog"])
 app.include_router(users.router, prefix=f"{settings.API_V1_STR}/users", tags=["users"])
 app.include_router(categories.router, prefix=f"{settings.API_V1_STR}/categories", tags=["categories"])
 app.include_router(products.router, prefix=f"{settings.API_V1_STR}/products", tags=["products"])

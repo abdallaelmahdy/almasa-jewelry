@@ -5,7 +5,6 @@ import { useAuthStore } from "@/stores/authStore";
 import { useSales } from "@/hooks/useSales";
 import { SalesTable } from "@/components/sales/SalesTable";
 import { SaleDetailsModal } from "@/components/sales/SaleDetailsModal";
-import { FileText } from "lucide-react";
 
 export default function SalesPage() {
   const { user } = useAuthStore();
@@ -22,44 +21,41 @@ export default function SalesPage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-8 p-4 md:p-8">
-      <div className="flex items-center gap-4">
-        <div className="bg-[#141414] p-4 rounded-xl border border-[#c5a059]/30 text-[#c5a059] shadow-[0_0_20px_rgba(197,160,89,0.1)]">
-          <FileText className="w-8 h-8" />
-        </div>
-        <div>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">سجل المبيعات</h2>
-          <p className="text-gray-400 mt-2">
-            استعراض الفواتير، المبيعات السابقة، ومعالجة الاسترجاع.
+    <div className="space-y-8 max-w-[1600px] mx-auto px-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end pb-6 border-b border-white/5 gap-6">
+        <div className="flex flex-col gap-2">
+          <h2 className="font-display text-3xl md:text-4xl text-white">المبيعات</h2>
+          <p className="font-sans text-xs text-muted-foreground uppercase tracking-wide">
+            ALMASA SALES LEDGER
           </p>
         </div>
       </div>
 
       {isError ? (
-        <div className="p-6 rounded-xl bg-red-950/50 text-red-400 border border-red-900/50 text-center shadow-lg">
-          <span className="font-bold">حدث خطأ أثناء جلب المبيعات:</span> {(error as any)?.response?.data?.detail || error.message}
+        <div className="p-4 bg-red-950/20 text-red-500 border-l-2 border-red-500 text-sm font-sans tracking-wide">
+          <span className="font-bold">خطأ:</span> {(error as any)?.response?.data?.detail || error.message}
         </div>
       ) : (
-        <div className="rounded-xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+        <div className="border border-white/10 bg-transparent flex flex-col gap-0 overflow-hidden">
           <SalesTable 
             sales={sales || []} 
             isLoading={isLoading} 
             onView={(id) => setSelectedSaleId(id)}
           />
           
-          <div className="flex items-center justify-between p-4 border-t border-[#262626] bg-[#141414]">
+          <div className="flex items-center justify-between p-4 border-t border-white/10 bg-white/[0.02]">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1 || isLoading}
-              className="px-4 py-2 border border-[#262626] rounded-md text-white hover:bg-[#262626] disabled:opacity-50 transition-colors"
+              className="px-6 py-2 border border-white/10 text-white hover:bg-white/[0.05] disabled:opacity-50 transition-colors font-sans text-[10px] uppercase tracking-luxury rounded-none"
             >
               السابق
             </button>
-            <span className="text-sm text-gray-400 font-mono">الصفحة {page}</span>
+            <span className="font-sans text-[10px] uppercase tracking-luxury text-white/50">الصفحة {page}</span>
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={!sales || sales.length < limit || isLoading}
-              className="px-4 py-2 border border-[#262626] rounded-md text-white hover:bg-[#262626] disabled:opacity-50 transition-colors"
+              className="px-6 py-2 border border-white/10 text-white hover:bg-white/[0.05] disabled:opacity-50 transition-colors font-sans text-[10px] uppercase tracking-luxury rounded-none"
             >
               التالي
             </button>

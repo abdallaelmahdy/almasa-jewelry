@@ -44,7 +44,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      command: 'cd ../backend && venv\\Scripts\\uvicorn app.main:app --port 8001',
+      command: 'cd ../backend && venv\\Scripts\\uvicorn app.main:app --host 0.0.0.0 --port 8001',
       port: 8001,
       timeout: 120 * 1000,
       reuseExistingServer: !process.env.CI,
@@ -55,7 +55,7 @@ export default defineConfig({
       }
     },
     {
-      command: 'npm run dev -- -p 3001',
+      command: 'npm run start -- -p 3001',
       port: 3001,
       timeout: 120 * 1000,
       reuseExistingServer: !process.env.CI,
