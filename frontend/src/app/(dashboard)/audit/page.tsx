@@ -6,8 +6,20 @@ import { useAuthStore } from "@/stores/authStore";
 import { useAuditLogs } from "@/hooks/useAudit";
 import { startOfDay, endOfDay } from "date-fns";
 import { ReportDateRange } from "@/components/reports/ReportDateRange";
-import { AuditTable } from "@/components/audit/AuditTable";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const AuditTable = dynamic(
+  () => import("@/components/audit/AuditTable").then((mod) => mod.AuditTable),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-6 border border-border bg-transparent shadow-sm h-[400px] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    ),
+  }
+);
 
 export default function AuditPage() {
   const { user } = useAuthStore();

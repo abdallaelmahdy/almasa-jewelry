@@ -8,14 +8,11 @@ import enum
 
 class ItemStatus(str, enum.Enum):
     AVAILABLE = "AVAILABLE"
-    LOCKED = "LOCKED"
     SOLD = "SOLD"
     RETURNED = "RETURNED"
 
 class TransactionType(str, enum.Enum):
     STOCK_IN = "STOCK_IN"
-    LOCK = "LOCK"
-    UNLOCK = "UNLOCK"
     ADJUST = "ADJUST"
     SELL = "SELL"
     RETURN = "RETURN"
@@ -32,8 +29,6 @@ class InventoryItem(Base):
     status = Column(Enum(ItemStatus), default=ItemStatus.AVAILABLE, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=True, onupdate=func.now())
-    locked_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    locked_at = Column(DateTime(timezone=True), nullable=True)
     
     product = relationship("Product")
 
@@ -63,5 +58,15 @@ class InventoryTransaction(Base):
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    inventory_item = relationship("InventoryItem")
+
+
+class Reservation(Base):
+    __tablename__ = "reservations"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    inventory_item_id = Column(UUID(as_uuid=True), ForeignKey("inventory_items.id"), unique=True, nullable=False)
+    session_id = Column(String, nullable=False, index=True)
+    expires_at = Column(DateTime(timezone=True), nullable=False, index=True)
     
     inventory_item = relationship("InventoryItem")

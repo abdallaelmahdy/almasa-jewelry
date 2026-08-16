@@ -23,7 +23,7 @@ from app.core.rate_limit import limiter
 def clear_db():
     """Clear database tables before running the entire test suite."""
     with engine.begin() as conn:
-        conn.execute(text("TRUNCATE users, refresh_sessions, audit_logs, customers, categories, products, gold_prices, sales, inventory_items, invoices, payments, inventory_transactions, invoice_items, refunds CASCADE"))
+        conn.execute(text("TRUNCATE users, refresh_sessions, audit_logs, customers, categories, products, gold_prices, sales, inventory_items, invoices, payments, inventory_transactions, invoice_items, refunds, reservations CASCADE"))
 
 @pytest.fixture(scope="function", autouse=True)
 def manage_rate_limits(request):

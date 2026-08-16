@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePOSStore } from "@/stores/posStore";
 import { Plus, Trash2, CreditCard, Banknote, Building } from "lucide-react";
 
@@ -11,6 +11,19 @@ export function POSPaymentForm() {
 
   const [method, setMethod] = useState("CASH");
   const [amount, setAmount] = useState("");
+  const amountInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Space to focus payment amount (only if not typing in an input already)
+      if (e.key === " " && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "SELECT") {
+        e.preventDefault();
+        amountInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleAdd = () => {
     const numAmount = parseFloat(amount);
@@ -36,12 +49,13 @@ export function POSPaymentForm() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-0 border border-white/10">
+    <div className="space-y-4">
+      {/* Payment Input Row */}
+      <div className="flex gap-0 border border-white/10 rounded-lg overflow-hidden">
         <select 
           value={method} 
           onChange={(e) => setMethod(e.target.value)}
-          className="bg-transparent border-none border-b sm:border-b-0 sm:border-l border-white/10 px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors sm:w-[150px] appearance-none rounded-none font-sans text-xs"
+          className="bg-[#0A0A0A] border-none border-e border-white/10 px-3 py-2.5 text-white focus:outline-none text-xs appearance-none min-w-[100px]"
         >
           <option value="CASH">نقدي</option>
           <option value="CARD">بطاقة إئتمان</option>
@@ -50,6 +64,7 @@ export function POSPaymentForm() {
         
         <div className="relative flex-1">
           <input
+            ref={amountInputRef}
             placeholder="أدخل المبلغ..."
             type="number"
             step="0.01"
@@ -62,38 +77,39 @@ export function POSPaymentForm() {
                 handleAdd();
               }
             }}
-            className="w-full h-full bg-white/[0.02] border-none py-3 px-4 text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all font-numeric tracking-widest text-left rounded-none"
+            className="w-full h-full bg-white/[0.02] border-none py-2.5 px-3 text-white placeholder-white/20 focus:outline-none transition-all font-numeric tracking-widest text-left text-sm"
             dir="ltr"
           />
-          <span className="absolute left-4 top-3.5 text-white/40 font-sans text-[9px] uppercase tracking-luxury">EGP</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-[10px]">EGP</span>
         </div>
         
         <button 
           onClick={handleAdd} 
-          className="bg-white/[0.05] hover:bg-primary hover:text-black text-white/70 transition-colors border-t sm:border-t-0 sm:border-r border-white/10 px-6 py-3 flex items-center justify-center rounded-none" 
+          className="bg-white/5 hover:bg-[#D4AF37] hover:text-black text-white/70 transition-colors border-s border-white/10 px-4 flex items-center justify-center" 
           title="إضافة دفعة"
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
 
+      {/* Recorded Payments */}
       {payments.length > 0 && (
-        <div className="space-y-3 mt-4">
-          <h4 className="font-sans text-[10px] uppercase tracking-luxury text-white/40">المدفوعات المسجلة</h4>
-          <div className="border border-white/10 flex flex-col gap-0 bg-transparent">
+        <div className="space-y-2">
+          <h4 className="text-[10px] text-white/30 uppercase tracking-wider">المدفوعات المسجلة</h4>
+          <div className="border border-white/10 rounded-lg overflow-hidden flex flex-col">
             {payments.map((p, idx) => {
               const Icon = methodIcons[p.method] || Banknote;
               return (
                 <div key={idx} className="flex justify-between items-center p-3 border-b border-white/5 last:border-b-0 hover:bg-white/[0.02] transition-colors">
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4 text-primary" />
-                    <span className="font-sans text-xs text-white">{methodLabels[p.method] || p.method}</span>
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4 text-[#D4AF37]" />
+                    <span className="text-xs text-white">{methodLabels[p.method] || p.method}</span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="font-numeric tracking-widest text-white">{p.amount} <span className="font-sans text-[10px] uppercase tracking-luxury text-primary ml-1">EGP</span></span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-numeric tracking-widest text-sm text-white">{p.amount} <span className="text-[10px] text-[#D4AF37] ms-1">EGP</span></span>
                     <button 
                       onClick={() => removePayment(idx)} 
-                      className="text-white/30 hover:text-red-500 p-2 transition-all border border-transparent hover:border-red-500/30 hover:bg-red-500/10"
+                      className="text-white/20 hover:text-red-400 p-1.5 rounded-lg transition-all hover:bg-red-500/10"
                       title="حذف الدفعة"
                     >
                       <Trash2 className="w-3 h-3" />

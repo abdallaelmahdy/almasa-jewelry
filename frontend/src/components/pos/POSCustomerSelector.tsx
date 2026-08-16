@@ -27,19 +27,19 @@ export function POSCustomerSelector() {
 
   if (customerId && customerName) {
     return (
-      <div className="p-4 border border-primary/20 bg-primary/5 flex justify-between items-center transition-all">
-        <div className="flex items-center gap-4">
-          <div className="bg-primary/10 p-2 border border-primary/20">
-            <UserCheck className="w-4 h-4 text-primary" />
+      <div className="p-3 border border-[#D4AF37]/20 bg-[#D4AF37]/5 rounded-lg flex justify-between items-center transition-all">
+        <div className="flex items-center gap-3">
+          <div className="bg-[#D4AF37]/10 p-2 rounded-lg border border-[#D4AF37]/20">
+            <UserCheck className="w-4 h-4 text-[#D4AF37]" />
           </div>
           <div>
-            <div className="font-sans text-[9px] font-bold tracking-luxury text-primary uppercase mb-1">العميل المحدد</div>
-            <div className="font-sans text-sm text-white tracking-wide">{customerName}</div>
+            <div className="text-[10px] font-bold tracking-wider text-[#D4AF37] uppercase mb-0.5">العميل المحدد</div>
+            <div className="text-sm text-white">{customerName}</div>
           </div>
         </div>
         <button 
           onClick={() => setCustomer(null, null)}
-          className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
           title="إلغاء التحديد"
         >
           <X className="w-4 h-4" />
@@ -49,45 +49,45 @@ export function POSCustomerSelector() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-0 border border-white/10">
+    <div className="space-y-3">
+      <div className="flex gap-0 border border-white/10 rounded-lg overflow-hidden">
         <div className="relative flex-1 group">
-          <Search className="absolute right-4 top-3.5 h-4 w-4 text-white/30 group-focus-within:text-primary transition-colors" />
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 group-focus-within:text-[#D4AF37] transition-colors" />
           <input
             placeholder="البحث برقم الهاتف أو الاسم..."
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full h-full bg-white/[0.01] border-none py-3 px-10 text-white placeholder-white/30 focus:outline-none focus:bg-white/[0.03] transition-all font-sans text-xs tracking-wide rounded-none"
+            className="w-full h-full bg-[#0A0A0A] border-none py-2.5 pe-10 ps-4 text-sm text-white placeholder-white/30 focus:outline-none transition-all"
           />
         </div>
         <button 
           onClick={() => setIsModalOpen(true)} 
-          className="px-6 bg-white/[0.05] border-r border-white/10 text-white/70 hover:bg-primary hover:text-black font-sans text-[10px] uppercase tracking-luxury transition-colors flex items-center justify-center rounded-none"
+          className="px-4 bg-white/5 border-s border-white/10 text-white/70 hover:bg-[#D4AF37] hover:text-black text-xs transition-colors flex items-center justify-center gap-1.5"
         >
-          <UserPlus className="w-3 h-3 me-2" />
+          <UserPlus className="w-3 h-3" />
           جديد
         </button>
       </div>
 
       {debouncedQuery && isLoading && (
-        <div className="flex justify-center p-6 border border-white/5 bg-white/[0.01]">
-          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+        <div className="flex justify-center p-4">
+          <Loader2 className="w-5 h-5 animate-spin text-[#D4AF37]" />
         </div>
       )}
 
       {debouncedQuery && !isLoading && customers && customers.length > 0 && (
-        <div className="border border-white/10 flex flex-col gap-0 bg-transparent">
+        <div className="border border-white/10 rounded-lg overflow-hidden flex flex-col">
           {customers.map((c) => (
             <div 
               key={c.id} 
-              className="p-3 flex justify-between items-center hover:bg-white/[0.02] border-b border-white/5 last:border-b-0 cursor-pointer transition-colors group" 
+              className="p-3 flex justify-between items-center hover:bg-white/[0.03] border-b border-white/5 last:border-b-0 cursor-pointer transition-colors group" 
               onClick={() => setCustomer(c.id, c.name)}
             >
-              <div className="flex flex-col gap-1">
-                <div className="font-sans text-xs text-white group-hover:text-primary transition-colors">{c.name}</div>
-                <div className="font-numeric text-[10px] text-white/50 tracking-widest" dir="ltr">{c.phone || "بدون رقم"}</div>
+              <div className="flex flex-col gap-0.5">
+                <div className="text-xs text-white group-hover:text-[#D4AF37] transition-colors">{c.name}</div>
+                <div className="font-numeric text-[10px] text-white/40 tracking-widest" dir="ltr">{c.phone || "بدون رقم"}</div>
               </div>
-              <button className="font-sans text-[9px] uppercase tracking-luxury font-bold text-primary px-3 py-1.5 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-none">
+              <button className="text-[10px] font-bold text-[#D4AF37] px-3 py-1 bg-[#D4AF37]/10 rounded opacity-0 group-hover:opacity-100 transition-opacity">
                 اختيار
               </button>
             </div>
@@ -96,7 +96,7 @@ export function POSCustomerSelector() {
       )}
 
       {debouncedQuery && !isLoading && customers && customers.length === 0 && (
-        <div className="font-sans text-[10px] uppercase tracking-luxury text-white/30 p-6 text-center border border-white/5 border-dashed bg-white/[0.01]">
+        <div className="text-xs text-white/30 p-4 text-center border border-white/5 border-dashed rounded-lg bg-white/[0.01]">
           لا يوجد عملاء مطابقين
         </div>
       )}

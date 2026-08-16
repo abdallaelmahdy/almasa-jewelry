@@ -140,15 +140,19 @@ def test_checkout_idempotency(client: TestClient, db_session: Session, admin_tok
     resp4 = client.post("/api/v1/sales/checkout", headers=admin_token_headers, json=payload4)
     assert resp4.status_code == 409
 
-def test_checkout_locked_by_other_user(client: TestClient, db_session: Session, admin_token_headers, normal_user_token_headers, test_product):
+def test_checkout_reserved_by_other_session(client: TestClient, db_session: Session, admin_token_headers, normal_user_token_headers, test_product):
     gp = setup_gold_price(db_session)
     item = setup_inventory(db_session, test_product)
     
-    # Admin locks the item
-    from app.models.user import User
-    admin_user = db_session.query(User).first()
-    item.status = ItemStatus.LOCKED
-    item.locked_by_id = admin_user.id if admin_user else 1
+    # Another session reserves the item
+    from app.models.inventory import Reservation
+    from datetime import datetime, timezone, timedelta
+    res = Reservation(
+        inventory_item_id=item.id,
+        session_id="other_session",
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=15)
+    )
+    db_session.add(res)
     db_session.commit()
     
     # Employee tries to buy it
@@ -160,7 +164,7 @@ def test_checkout_locked_by_other_user(client: TestClient, db_session: Session, 
     
     response = client.post("/api/v1/sales/checkout", headers=normal_user_token_headers, json=payload)
     assert response.status_code == 409
-    assert "locked by another user" in response.text
+    assert "reserved by another session" in response.text
 
 def test_refund_success(client: TestClient, db_session: Session, admin_token_headers, test_product):
     gp = setup_gold_price(db_session)
@@ -270,7 +274,7 @@ def get_real_db_session():
 async def setup_real_db():
     with get_real_db_session() as db:
         # Ensure it's clean
-        db.execute(text("TRUNCATE users, refresh_sessions, audit_logs, customers, categories, products, gold_prices, sales, inventory_items, invoices, payments, inventory_transactions, invoice_items, refunds CASCADE"))
+        db.execute(text("TRUNCATE users, refresh_sessions, audit_logs, customers, categories, products, gold_prices, sales, inventory_items, invoices, payments, inventory_transactions, invoice_items, refunds, reservations CASCADE"))
         db.commit()
         
         # Create user and get token
@@ -340,7 +344,7 @@ async def test_concurrent_checkout_same_item():
     assert status_codes == [201, 409]
 
     with get_real_db_session() as db:
-        db.execute(text("TRUNCATE users, refresh_sessions, audit_logs, customers, categories, products, gold_prices, sales, inventory_items, invoices, payments, inventory_transactions, invoice_items, refunds CASCADE"))
+        db.execute(text("TRUNCATE users, refresh_sessions, audit_logs, customers, categories, products, gold_prices, sales, inventory_items, invoices, payments, inventory_transactions, invoice_items, refunds, reservations CASCADE"))
         db.commit()
 
 @pytest.mark.anyio
@@ -371,7 +375,7 @@ async def test_concurrent_checkout_same_idempotency_key():
         sales = db.query(Sale).filter(Sale.idempotency_key == payload["idempotency_key"]).all()
         assert len(sales) == 1
 
-        db.execute(text("TRUNCATE users, refresh_sessions, audit_logs, customers, categories, products, gold_prices, sales, inventory_items, invoices, payments, inventory_transactions, invoice_items, refunds CASCADE"))
+        db.execute(text("TRUNCATE users, refresh_sessions, audit_logs, customers, categories, products, gold_prices, sales, inventory_items, invoices, payments, inventory_transactions, invoice_items, refunds, reservations CASCADE"))
         db.commit()
 
 @pytest.mark.anyio
@@ -408,5 +412,5 @@ async def test_concurrent_refund_same_sale():
         assert len(refunds) == 1
 
         # Cleanup
-        db.execute(text("TRUNCATE users, refresh_sessions, audit_logs, customers, categories, products, gold_prices, sales, inventory_items, invoices, payments, inventory_transactions, invoice_items, refunds CASCADE"))
+        db.execute(text("TRUNCATE users, refresh_sessions, audit_logs, customers, categories, products, gold_prices, sales, inventory_items, invoices, payments, inventory_transactions, invoice_items, refunds, reservations CASCADE"))
         db.commit()

@@ -31,38 +31,35 @@ export function POSCart() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center border border-white/5 border-dashed bg-white/[0.01]">
-        <div className="w-12 h-12 flex items-center justify-center mb-4 border border-white/10 bg-white/[0.02]">
-          <PackageSearch className="w-5 h-5 text-white/30" />
+      <div className="flex flex-col items-center justify-center p-10 text-center">
+        <div className="w-12 h-12 flex items-center justify-center mb-4 rounded-xl bg-white/5 border border-white/10">
+          <PackageSearch className="w-5 h-5 text-white/20" />
         </div>
-        <p className="font-sans text-xs uppercase tracking-luxury text-white/50">السلة فارغة</p>
+        <p className="text-xs text-white/40">السلة فارغة</p>
+        <p className="text-[10px] text-white/20 mt-1">ابحث عن قطعة بالـ SKU لإضافتها</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div>
       {errorMsg && (
-        <div className="p-4 text-[10px] uppercase font-sans tracking-luxury bg-red-950/20 text-red-500 border-l-2 border-red-500">
+        <div className="mx-4 mt-3 p-3 text-xs bg-red-950/20 text-red-400 border border-red-500/20 rounded-lg">
           {errorMsg}
         </div>
       )}
-      <div className="border-t border-white/10 flex flex-col gap-0">
+      <div className="flex flex-col">
         {cartItems.map((item) => (
-          <div key={item.id} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-white/[0.02] border-b border-white/5 transition-colors group">
-            <div className="flex items-center gap-4">
-              <div>
-                <div className="font-numeric font-bold text-white tracking-widest">{item.sku}</div>
-                <div className="font-sans text-[10px] text-muted-foreground mt-1 tracking-wide">
+          <div key={item.id} className="p-4 flex justify-between items-center hover:bg-white/[0.02] border-b border-white/5 transition-colors group">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="min-w-0">
+                <div className="font-numeric font-bold text-white tracking-widest text-sm">{item.sku}</div>
+                <div className="text-[11px] text-white/50 mt-1 truncate">
                   {item.product.name}
                 </div>
-                <div className="text-xs flex gap-3 text-white/50 mt-2 font-medium">
-                  <span className="font-sans text-[9px] uppercase tracking-luxury">
-                    الوزن: <span className="font-numeric text-primary tracking-widest ml-1">{item.weight}G</span>
-                  </span>
-                  <span className="font-sans text-[9px] uppercase tracking-luxury">
-                    العيار: <span className="font-numeric text-primary tracking-widest ml-1">{item.karat}</span>
-                  </span>
+                <div className="text-xs flex gap-3 text-white/40 mt-1.5">
+                  <span>الوزن: <span className="font-numeric text-[#D4AF37] ms-1">{item.weight}G</span></span>
+                  <span>العيار: <span className="font-numeric text-[#D4AF37] ms-1">{item.karat}</span></span>
                 </div>
               </div>
             </div>
@@ -70,7 +67,7 @@ export function POSCart() {
             <button
               onClick={() => handleRemove(item.id)}
               disabled={unlockingId === item.id}
-              className="text-white/30 hover:text-red-500 p-2 border border-transparent hover:border-red-500/30 hover:bg-red-500/10 transition-all self-end sm:self-auto disabled:opacity-50"
+              className="text-white/20 hover:text-red-400 p-2 rounded-lg border border-transparent hover:border-red-500/20 hover:bg-red-500/10 transition-all shrink-0 disabled:opacity-50"
               title="إزالة من السلة"
             >
               {unlockingId === item.id ? (

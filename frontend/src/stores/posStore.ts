@@ -13,6 +13,8 @@ interface POSState {
   payments: PaymentInput[];
   idempotencyKey: string;
   completedSale: SaleOut | null;
+  goldPrices: Record<number, number>; // karat -> price_per_gram
+  cartTotal: number;
 
   // Actions
   addItem: (item: InventoryItemOut) => void;
@@ -23,6 +25,8 @@ interface POSState {
   setCompletedSale: (sale: SaleOut | null) => void;
   clearCart: () => void;
   resetIdempotencyKey: () => void;
+  setGoldPrices: (prices: Record<number, number>) => void;
+  recalculateTotal: () => void;
 }
 
 export const usePOSStore = create<POSState>((set) => ({
@@ -32,6 +36,8 @@ export const usePOSStore = create<POSState>((set) => ({
   payments: [],
   idempotencyKey: generateIdempotencyKey(),
   completedSale: null,
+  goldPrices: {},
+  cartTotal: 0,
 
   addItem: (item) =>
     set((state) => {
@@ -39,13 +45,24 @@ export const usePOSStore = create<POSState>((set) => ({
       if (state.cartItems.some((i) => i.id === item.id)) {
         return state;
       }
-      return { cartItems: [...state.cartItems, item] };
+      const newItems = [...state.cartItems, item];
+      // Optimistic total calculation
+      const total = newItems.reduce((sum, i) => {
+        const price = state.goldPrices[i.karat] || 0;
+        return sum + (price * parseFloat(i.weight)) + parseFloat(i.manufacturing_fee);
+      }, 0);
+      return { cartItems: newItems, cartTotal: total };
     }),
 
   removeItem: (itemId) =>
-    set((state) => ({
-      cartItems: state.cartItems.filter((i) => i.id !== itemId),
-    })),
+    set((state) => {
+      const newItems = state.cartItems.filter((i) => i.id !== itemId);
+      const total = newItems.reduce((sum, i) => {
+        const price = state.goldPrices[i.karat] || 0;
+        return sum + (price * parseFloat(i.weight)) + parseFloat(i.manufacturing_fee);
+      }, 0);
+      return { cartItems: newItems, cartTotal: total };
+    }),
 
   setCustomer: (id, name) =>
     set(() => ({
@@ -74,6 +91,7 @@ export const usePOSStore = create<POSState>((set) => ({
       customerId: null,
       customerName: null,
       payments: [],
+      cartTotal: 0,
       idempotencyKey: generateIdempotencyKey(), // Generate a new key for the next completely new cart
     })),
 
@@ -81,4 +99,22 @@ export const usePOSStore = create<POSState>((set) => ({
     set(() => ({
       idempotencyKey: generateIdempotencyKey(),
     })),
+
+  setGoldPrices: (prices) =>
+    set((state) => {
+      const total = state.cartItems.reduce((sum, i) => {
+        const price = prices[i.karat] || 0;
+        return sum + (price * parseFloat(i.weight)) + parseFloat(i.manufacturing_fee);
+      }, 0);
+      return { goldPrices: prices, cartTotal: total };
+    }),
+
+  recalculateTotal: () =>
+    set((state) => {
+      const total = state.cartItems.reduce((sum, i) => {
+        const price = state.goldPrices[i.karat] || 0;
+        return sum + (price * parseFloat(i.weight)) + parseFloat(i.manufacturing_fee);
+      }, 0);
+      return { cartTotal: total };
+    }),
 }));

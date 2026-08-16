@@ -42,6 +42,7 @@ class InventoryTransitionRequest(BaseModel):
     reason: str = Field(..., min_length=1)
     reference_id: Optional[str] = None
     reference_type: Optional[str] = None
+    session_id: Optional[str] = None
 
 class InventoryItemInDBBase(InventoryItemBase):
     id: UUID
@@ -49,8 +50,6 @@ class InventoryItemInDBBase(InventoryItemBase):
     status: ItemStatus
     created_at: datetime
     updated_at: Optional[datetime] = None
-    locked_by_id: Optional[int] = None
-    locked_at: Optional[datetime] = None
     model_config = ConfigDict(from_attributes=True)
 
 class InventoryItemOut(InventoryItemInDBBase):

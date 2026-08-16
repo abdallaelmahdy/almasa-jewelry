@@ -9,28 +9,29 @@ from app.core import security
 from app.core.config import settings
 from app.models.user import User
 from app.models.auth import RefreshSession
-from app.models.audit import AuditLog
+from fastapi import BackgroundTasks
+from app.services.audit import log_audit_background
 from app.schemas.token import Token
 
 from app.core.rate_limit import limiter
 
 router = APIRouter()
 
-def _create_audit_log(db: Session, user_id: int, action: str, ip: str = None) -> None:
-    audit = AuditLog(
+def _create_audit_log(background_tasks: BackgroundTasks, user_id: int, action: str, ip: str = None) -> None:
+    background_tasks.add_task(
+        log_audit_background,
         user_id=user_id,
         action_type=action,
         resource_id="auth",
         ip_address=ip
     )
-    db.add(audit)
-    db.commit()
 
 @router.post("/login", response_model=Token)
 @limiter.limit("5/minute")
 def login_access_token(
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(deps.get_db),
     form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
@@ -44,7 +45,7 @@ def login_access_token(
     elif not user.is_active:
         raise HTTPException(status_code=401, detail="Inactive user")
     
-    _create_audit_log(db, user.id, "LOGIN_SUCCESS", request.client.host if request.client else None)
+    _create_audit_log(background_tasks, user.id, "LOGIN_SUCCESS", request.client.host if request.client else None)
     
     # Generate tokens
     access_token = security.create_access_token(user.id, user.role)
@@ -81,6 +82,7 @@ def login_access_token(
 def refresh_token(
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
     refresh_token: str | None = Cookie(default=None),
     db: Session = Depends(deps.get_db)
 ) -> Any:
@@ -99,7 +101,7 @@ def refresh_token(
     if session.is_revoked:
         # Reuse detected! Revoke all sessions for this user.
         db.query(RefreshSession).filter(RefreshSession.user_id == session.user_id).update({"is_revoked": True})
-        _create_audit_log(db, session.user_id, "SECURITY_EVENT_REFRESH_REUSE", request.client.host if request.client else None)
+        _create_audit_log(background_tasks, session.user_id, "SECURITY_EVENT_REFRESH_REUSE", request.client.host if request.client else None)
         db.commit()
         response.delete_cookie(key="refresh_token", path="/api/v1/auth", httponly=True, secure=True if settings.ENVIRONMENT == "production" else False, samesite="strict")
         raise HTTPException(status_code=401, detail="Session invalid")
@@ -147,6 +149,7 @@ def refresh_token(
 def logout(
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
     refresh_token: str | None = Cookie(default=None),
     db: Session = Depends(deps.get_db)
 ) -> Any:
@@ -158,7 +161,7 @@ def logout(
         session = db.query(RefreshSession).filter(RefreshSession.token_hash == token_hash).first()
         if session:
             session.is_revoked = True
-            _create_audit_log(db, session.user_id, "LOGOUT", request.client.host if request.client else None)
+            _create_audit_log(background_tasks, session.user_id, "LOGOUT", request.client.host if request.client else None)
             db.commit()
             
     response.delete_cookie(

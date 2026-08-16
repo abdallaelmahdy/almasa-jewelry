@@ -5,26 +5,28 @@ from sqlalchemy.exc import IntegrityError
 
 from app.api import deps
 from app.models.sales import Customer
-from app.models.audit import AuditLog
+from fastapi import BackgroundTasks
+from app.services.audit import log_audit_background
 from app.schemas.customer import CustomerCreate, CustomerUpdate, CustomerOut
 
 router = APIRouter()
 
-def _log_audit(db: Session, user_id: int, action: str, resource_id: str, old_vals: dict = None, new_vals: dict = None):
-    audit = AuditLog(
+def _log_audit(background_tasks: BackgroundTasks, user_id: int, action: str, resource_id: str, old_vals: dict = None, new_vals: dict = None):
+    background_tasks.add_task(
+        log_audit_background,
         user_id=user_id,
         action_type=action,
         resource_id=resource_id,
         old_values=old_vals,
-        new_values=new_vals,
+        new_values=new_vals
     )
-    db.add(audit)
 
 @router.post("", response_model=CustomerOut)
 def create_customer(
     *,
     db: Session = Depends(deps.get_db),
     customer_in: CustomerCreate,
+    background_tasks: BackgroundTasks,
     current_user: Any = Depends(deps.RoleChecker(["admin", "employee"]))
 ) -> Any:
     """Create new customer."""
@@ -40,8 +42,7 @@ def create_customer(
         db.rollback()
         raise HTTPException(status_code=409, detail="Customer with this phone number already exists")
         
-    _log_audit(db, current_user.id, "CUSTOMER_CREATED", str(customer.id), None, {"name": customer.name, "phone": customer.phone})
-    db.commit()
+    _log_audit(background_tasks, current_user.id, "CUSTOMER_CREATED", str(customer.id), None, {"name": customer.name, "phone": customer.phone})
     return customer
 
 @router.get("", response_model=List[CustomerOut])
@@ -82,6 +83,7 @@ def update_customer(
     db: Session = Depends(deps.get_db),
     id: int,
     customer_in: CustomerUpdate,
+    background_tasks: BackgroundTasks,
     current_user: Any = Depends(deps.RoleChecker(["admin", "employee"]))
 ) -> Any:
     """Update a customer."""
@@ -101,6 +103,5 @@ def update_customer(
         db.rollback()
         raise HTTPException(status_code=409, detail="Customer with this phone number already exists")
         
-    _log_audit(db, current_user.id, "CUSTOMER_UPDATED", str(customer.id), old_vals, {"name": customer.name, "phone": customer.phone})
-    db.commit()
+    _log_audit(background_tasks, current_user.id, "CUSTOMER_UPDATED", str(customer.id), old_vals, {"name": customer.name, "phone": customer.phone})
     return customer

@@ -34,7 +34,7 @@ export function LuxuryHeader() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-in-out",
         isScrolled 
-          ? "bg-background border-b border-white/5 py-5 shadow-2xl" 
+          ? "bg-background border-b border-border py-5 shadow-sm" 
           : "bg-gradient-to-b from-black/50 to-transparent border-b border-transparent py-8"
       )}
     >
@@ -48,9 +48,9 @@ export function LuxuryHeader() {
                 key={link.name} 
                 href={link.href}
                 className={cn(
-                  "font-sans text-[11px] uppercase tracking-luxury transition-colors hover:text-white relative py-1",
-                  isScrolled ? "text-white/60" : "text-white/80",
-                  pathname === link.href && "text-white"
+                  "font-sans text-xs transition-colors relative py-1",
+                  isScrolled ? "text-foreground/80 hover:text-foreground" : "text-white/80 hover:text-white",
+                  pathname === link.href && (isScrolled ? "text-foreground font-semibold" : "text-white font-semibold")
                 )}
               >
                 {link.name}
@@ -62,30 +62,28 @@ export function LuxuryHeader() {
             ))}
           </nav>
 
-          {/* Logo - Center */}
           <Link href="/" className="flex flex-col items-center justify-center flex-none group">
             <span className={cn(
-              "font-display text-2xl lg:text-3xl font-bold tracking-wide transition-colors duration-500",
-              "text-white"
+              "font-display text-2xl lg:text-3xl font-bold transition-colors duration-500",
+              isScrolled ? "text-foreground" : "text-white"
             )}>
               الماسة
             </span>
             <span className={cn(
-              "font-sans text-[9px] uppercase tracking-[0.3em] transition-colors duration-500 mt-1",
-              isScrolled ? "text-primary/80" : "text-white/60 group-hover:text-primary/80"
+              "font-sans text-[10px] transition-colors duration-500 mt-1",
+              isScrolled ? "text-primary" : "text-white/80 group-hover:text-primary"
             )}>
               للمجوهرات
             </span>
           </Link>
 
-          {/* Actions - Left side (RTL) */}
           <div className="hidden md:flex items-center justify-end gap-6 flex-1">
             {user ? (
               <Link 
                 href="/dashboard" 
                 className={cn(
-                  "flex items-center gap-2 font-sans text-[11px] uppercase tracking-luxury transition-colors hover:text-white pb-1 border-b border-transparent hover:border-white/30",
-                  isScrolled ? "text-white/60" : "text-white/80"
+                  "flex items-center gap-2 font-sans text-xs transition-colors pb-1 border-b border-transparent",
+                  isScrolled ? "text-foreground/80 hover:text-foreground hover:border-foreground/30" : "text-white/80 hover:text-white hover:border-white/30"
                 )}
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
@@ -95,8 +93,8 @@ export function LuxuryHeader() {
               <Link 
                 href="/login" 
                 className={cn(
-                  "flex items-center gap-2 font-sans text-[11px] uppercase tracking-luxury transition-colors hover:text-white pb-1 border-b border-transparent hover:border-white/30",
-                  isScrolled ? "text-white/60" : "text-white/80"
+                  "flex items-center gap-2 font-sans text-xs transition-colors pb-1 border-b border-transparent",
+                  isScrolled ? "text-foreground/80 hover:text-foreground hover:border-foreground/30" : "text-white/80 hover:text-white hover:border-white/30"
                 )}
               >
                 <LogIn className="w-3.5 h-3.5" />
@@ -105,9 +103,11 @@ export function LuxuryHeader() {
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
           <button 
-            className="md:hidden z-[60] p-2 text-white/80 hover:text-white transition-colors"
+            className={cn(
+              "md:hidden z-[60] p-2 transition-colors",
+              isScrolled ? (isMobileMenuOpen ? "text-white" : "text-foreground/80 hover:text-foreground") : "text-white/80 hover:text-white"
+            )}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -115,10 +115,9 @@ export function LuxuryHeader() {
         </div>
       </div>
 
-      {/* Mobile Menu (Full Screen Cinematic Overlay) */}
       <div 
         className={cn(
-          "fixed inset-0 bg-[#080808] z-[55] flex flex-col items-center justify-center transition-all duration-700 ease-in-out md:hidden",
+          "fixed inset-0 bg-background z-[55] flex flex-col items-center justify-center transition-all duration-700 ease-in-out md:hidden",
           isMobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         )}
       >
@@ -131,7 +130,7 @@ export function LuxuryHeader() {
               key={link.name} 
               href={link.href}
               className={cn(
-                "font-display text-3xl md:text-4xl text-white/70 hover:text-white transition-all duration-500 transform",
+                "font-display text-3xl md:text-4xl text-foreground/70 hover:text-foreground transition-all duration-500 transform",
                 isMobileMenuOpen ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
@@ -142,7 +141,7 @@ export function LuxuryHeader() {
           ))}
           
           <div className={cn(
-            "h-px w-16 bg-white/10 my-6 transition-all duration-700 delay-500",
+            "h-px w-16 bg-border my-6 transition-all duration-700 delay-500",
             isMobileMenuOpen ? "scale-x-100" : "scale-x-0"
           )} />
           
@@ -150,7 +149,7 @@ export function LuxuryHeader() {
             <Link 
               href="/dashboard" 
               className={cn(
-                "flex items-center gap-2 font-sans text-xs tracking-luxury uppercase text-primary hover:text-white transition-all duration-500 transform",
+                "flex items-center gap-2 font-sans text-sm text-primary hover:text-primary/80 transition-all duration-500 transform",
                 isMobileMenuOpen ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
               )}
               style={{ transitionDelay: "600ms" }}
@@ -163,7 +162,7 @@ export function LuxuryHeader() {
             <Link 
               href="/login" 
               className={cn(
-                "flex items-center gap-2 font-sans text-xs tracking-luxury uppercase text-primary hover:text-white transition-all duration-500 transform",
+                "flex items-center gap-2 font-sans text-sm text-primary hover:text-primary/80 transition-all duration-500 transform",
                 isMobileMenuOpen ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
               )}
               style={{ transitionDelay: "600ms" }}

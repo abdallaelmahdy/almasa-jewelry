@@ -1,5 +1,5 @@
 from typing import Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import text
@@ -16,6 +16,7 @@ from app.schemas.inventory import (
     InventoryTransitionRequest,
     InventoryTransactionOut
 )
+from app.services.inventory import InventoryService
 
 router = APIRouter()
 
@@ -23,16 +24,6 @@ def _generate_sku(db: Session) -> str:
     """Generate sequential SKU using PostgreSQL sequence"""
     result = db.execute(text("SELECT nextval('inventory_sku_seq')")).scalar()
     return f"ALM-{result:08d}"
-
-def _log_audit(db: Session, user_id: int, action: str, resource_id: str, old_vals: dict, new_vals: dict):
-    audit = AuditLog(
-        user_id=user_id,
-        action_type=action,
-        resource_id=resource_id,
-        old_values=old_vals,
-        new_values=new_vals
-    )
-    db.add(audit)
 
 @router.get("/", response_model=List[InventoryItemOut])
 def list_inventory(
@@ -91,10 +82,10 @@ def stock_intake(
     *,
     db: Session = Depends(deps.get_db),
     item_in: InventoryItemCreate,
+    background_tasks: BackgroundTasks,
     current_user: Any = Depends(deps.RoleChecker(["admin"]))
 ) -> Any:
     """Stock intake (Admin only)"""
-    # Verify product
     product = db.query(Product).filter(Product.id == item_in.product_id).first()
     if not product:
         raise HTTPException(status_code=400, detail="Product not found")
@@ -111,9 +102,8 @@ def stock_intake(
         status=ItemStatus.AVAILABLE
     )
     db.add(item)
-    db.flush() # flush to get item.id generated
+    db.flush() 
     
-    # Create transaction
     tx = InventoryTransaction(
         inventory_item_id=item.id,
         transaction_type=TransactionType.STOCK_IN,
@@ -127,8 +117,8 @@ def stock_intake(
     )
     db.add(tx)
     
-    _log_audit(
-        db, current_user.id, "INVENTORY_CREATED", str(item.id), 
+    InventoryService._log_audit(
+        background_tasks, current_user.id, "INVENTORY_CREATED", str(item.id), 
         old_vals={}, 
         new_vals={"sku": item.sku, "status": item.status.value, "weight": str(item.weight), "cost_basis": str(item.cost_basis)}
     )
@@ -136,62 +126,6 @@ def stock_intake(
     db.commit()
     db.refresh(item)
     
-    # Reload with relations for the return model
-    item_out = db.query(InventoryItem).options(joinedload(InventoryItem.product).joinedload(Product.category)).filter(InventoryItem.id == item.id).first()
-    return item_out
-
-
-def _transition_item(db: Session, current_user: Any, item_id: str, expected_status: ItemStatus, new_status: ItemStatus, req: InventoryTransitionRequest, tx_type: TransactionType) -> InventoryItem:
-    try:
-        item = db.query(InventoryItem).with_for_update().filter(InventoryItem.id == item_id).first()
-    except OperationalError:
-        db.rollback()
-        raise HTTPException(status_code=409, detail="Could not acquire lock on inventory item")
-        
-    if not item:
-        db.rollback()
-        raise HTTPException(status_code=404, detail="Inventory item not found")
-        
-    if item.status != expected_status:
-        db.rollback()
-        raise HTTPException(status_code=409, detail=f"Item status is {item.status}, expected {expected_status}")
-
-    prev_status = item.status
-    item.status = new_status
-    
-    if tx_type == TransactionType.UNLOCK:
-        if current_user.role != "admin" and item.locked_by_id != current_user.id:
-            db.rollback()
-            raise HTTPException(status_code=403, detail="Cannot unlock item locked by another user")
-        item.locked_by_id = None
-        item.locked_at = None
-    elif tx_type == TransactionType.LOCK:
-        item.locked_by_id = current_user.id
-        from sqlalchemy.sql import func
-        item.locked_at = func.now()
-    
-    tx = InventoryTransaction(
-        inventory_item_id=item.id,
-        transaction_type=tx_type,
-        previous_status=prev_status,
-        new_status=new_status,
-        historical_weight=item.weight,
-        historical_karat=item.karat,
-        historical_cost_basis=item.cost_basis,
-        historical_manufacturing_fee=item.manufacturing_fee,
-        reference_type=req.reference_type,
-        reference_id=req.reference_id,
-        created_by_id=current_user.id
-    )
-    db.add(tx)
-    
-    _log_audit(
-        db, current_user.id, f"INVENTORY_STATUS_CHANGE_{tx_type.name}", str(item.id),
-        old_vals={"status": prev_status.value},
-        new_vals={"status": new_status.value, "reason": req.reason}
-    )
-    
-    db.commit()
     return db.query(InventoryItem).options(joinedload(InventoryItem.product).joinedload(Product.category)).filter(InventoryItem.id == item.id).first()
 
 
@@ -203,8 +137,10 @@ def lock_inventory(
     req: InventoryTransitionRequest,
     current_user: Any = Depends(deps.RoleChecker(["admin", "employee"]))
 ) -> Any:
-    """Lock an AVAILABLE item"""
-    return _transition_item(db, current_user, id, ItemStatus.AVAILABLE, ItemStatus.LOCKED, req, TransactionType.LOCK)
+    """Reserve an AVAILABLE item"""
+    session_id = req.session_id or "pos_session"
+    InventoryService.reserve_item(db, id, session_id, expires_in_minutes=15)
+    return db.query(InventoryItem).options(joinedload(InventoryItem.product).joinedload(Product.category)).filter(InventoryItem.id == id).first()
 
 @router.post("/{id}/unlock", response_model=InventoryItemOut)
 def unlock_inventory(
@@ -214,8 +150,10 @@ def unlock_inventory(
     req: InventoryTransitionRequest,
     current_user: Any = Depends(deps.RoleChecker(["admin", "employee"]))
 ) -> Any:
-    """Unlock a LOCKED item to AVAILABLE"""
-    return _transition_item(db, current_user, id, ItemStatus.LOCKED, ItemStatus.AVAILABLE, req, TransactionType.UNLOCK)
+    """Release a reservation"""
+    session_id = req.session_id or "pos_session"
+    InventoryService.release_reservation(db, id, session_id)
+    return db.query(InventoryItem).options(joinedload(InventoryItem.product).joinedload(Product.category)).filter(InventoryItem.id == id).first()
 
 @router.post("/{id}/return", response_model=InventoryItemOut)
 def return_inventory(
@@ -223,10 +161,16 @@ def return_inventory(
     db: Session = Depends(deps.get_db),
     id: str,
     req: InventoryTransitionRequest,
+    background_tasks: BackgroundTasks,
     current_user: Any = Depends(deps.RoleChecker(["admin"]))
 ) -> Any:
-    """Transition SOLD item to RETURNED (prepare state for returning to AVAILABLE)"""
-    return _transition_item(db, current_user, id, ItemStatus.SOLD, ItemStatus.RETURNED, req, TransactionType.RETURN)
+    """Transition SOLD item to RETURNED"""
+    item = InventoryService.transition_item(
+        db, current_user.id, id, ItemStatus.SOLD, ItemStatus.RETURNED, 
+        TransactionType.RETURN, background_tasks, req.reference_type, req.reference_id, req.reason
+    )
+    db.commit()
+    return db.query(InventoryItem).options(joinedload(InventoryItem.product).joinedload(Product.category)).filter(InventoryItem.id == item.id).first()
 
 @router.post("/{id}/adjust", response_model=InventoryItemOut)
 def adjust_inventory(
@@ -234,6 +178,7 @@ def adjust_inventory(
     db: Session = Depends(deps.get_db),
     id: str,
     req: InventoryAdjustmentRequest,
+    background_tasks: BackgroundTasks,
     current_user: Any = Depends(deps.RoleChecker(["admin"]))
 ) -> Any:
     """Adjust an inventory item's properties (Admin only)"""
@@ -281,7 +226,7 @@ def adjust_inventory(
     )
     db.add(tx)
     
-    _log_audit(db, current_user.id, "INVENTORY_ADJUSTED", str(item.id), old_vals, new_vals)
+    InventoryService._log_audit(background_tasks, current_user.id, "INVENTORY_ADJUSTED", str(item.id), old_vals, new_vals)
     
     db.commit()
     

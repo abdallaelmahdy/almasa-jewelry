@@ -67,7 +67,8 @@ export default function LoginPage() {
       if (error.response?.status === 401) {
         setErrorMsg("اسم المستخدم أو كلمة المرور غير صحيحة");
       } else {
-        setErrorMsg("حدث خطأ في الاتصال بالخادم");
+        const errorDetail = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+        setErrorMsg(`حدث خطأ في الاتصال بالخادم: ${errorDetail}`);
       }
     }
   }

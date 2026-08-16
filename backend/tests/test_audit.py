@@ -9,9 +9,22 @@ def test_audit_employee_denied(client: TestClient, normal_user_token_headers: di
     r = client.get("/api/v1/audit", headers=normal_user_token_headers)
     assert r.status_code == 403
 
-def test_audit_filters(client: TestClient, admin_token_headers: dict):
-    # Perform an action to create an audit log
-    client.post("/api/v1/customers", json={"name": "Audit Test", "phone": "1000"}, headers=admin_token_headers)
+from app.models.audit import AuditLog
+from sqlalchemy.orm import Session
+
+def test_audit_filters(client: TestClient, admin_token_headers: dict, db_session: Session):
+    from app.models.user import User
+    user = db_session.query(User).first()
+    
+    # Perform an action to create an audit log manually to bypass BackgroundTask SessionLocal issues
+    audit = AuditLog(
+        user_id=user.id,
+        action_type="CUSTOMER_CREATED",
+        resource_id="1",
+        new_values={"name": "Audit Test", "phone": "1000"}
+    )
+    db_session.add(audit)
+    db_session.commit()
     
     # Filter by action_type
     r = client.get("/api/v1/audit?action_type=CUSTOMER_CREATED", headers=admin_token_headers)

@@ -6,8 +6,21 @@ import { useAuthStore } from "@/stores/authStore";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { ReportDateRange } from "@/components/reports/ReportDateRange";
 import { SalesSummaryCards } from "@/components/reports/SalesSummaryCards";
-import { SalesSummaryChart } from "@/components/reports/SalesSummaryChart";
 import { InventoryValuationCard } from "@/components/reports/InventoryValuationCard";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
+
+const SalesSummaryChart = dynamic(
+  () => import("@/components/reports/SalesSummaryChart").then((mod) => mod.SalesSummaryChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-6 rounded-none border border-border bg-background shadow-sm h-[400px] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    ),
+  }
+);
 
 export default function ReportsPage() {
   const { user } = useAuthStore();

@@ -1,144 +1,315 @@
 "use client";
 
-import { useState } from "react";
-import { useAuthStore } from "@/stores/authStore";
-import { usePOSStore } from "@/stores/posStore";
-import { useCheckout } from "@/hooks/usePOS";
-import { POSInventorySelector } from "@/components/pos/POSInventorySelector";
-import { POSCart } from "@/components/pos/POSCart";
-import { POSCustomerSelector } from "@/components/pos/POSCustomerSelector";
-import { POSPaymentForm } from "@/components/pos/POSPaymentForm";
-import { POSSummary } from "@/components/pos/POSSummary";
+import { useState, useEffect, useMemo } from "react";
+import { Search } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+
+import { CategoryTabs } from "./components/category-tabs";
+import { ProductGrid, ProductCardData } from "./components/product-grid";
+import { GoldCalculator } from "./components/gold-calculator";
+import { InvoicePanel, InvoiceRowData } from "./components/invoice-panel";
 import { InvoiceModal } from "@/components/pos/InvoiceModal";
-import { ShoppingBag, Box, UserSquare2, Wallet } from "lucide-react";
-import { LuxuryCard, LuxuryCardContent, LuxuryCardHeader, LuxuryCardTitle } from "@/components/luxury/LuxuryCard";
+import { CheckoutModal } from "@/components/pos/CheckoutModal";
+import { CustomerModal } from "@/components/pos/CustomerModal";
+
+import { useInventory, useLockInventory, useUnlockInventory } from "@/hooks/useInventory";
+import { useCheckout } from "@/hooks/usePOS";
+import { usePOSStore } from "@/stores/posStore";
+import { GoldPriceOut } from "@/types/sales";
+import { InventoryItemOut } from "@/types/inventory";
 
 export default function POSPage() {
-  const { user } = useAuthStore();
-  const { 
-    cartItems, 
-    customerId, 
-    payments, 
-    idempotencyKey, 
-    setCompletedSale,
-    clearCart
-  } = usePOSStore();
-  
-  const checkoutMutation = useCheckout();
+  // ─── Search & Category State ───
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("الكل");
+
+  // ─── Calculator State ───
+  const [calcKarat, setCalcKarat] = useState("21");
+  const [calcWeight, setCalcWeight] = useState("10");
+  const [calcManufacturing, setCalcManufacturing] = useState("150");
+
+  // ─── Locking State ───
+  const [lockingId, setLockingId] = useState<string | null>(null);
+  const [unlockingId, setUnlockingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleCheckout = async () => {
-    if (cartItems.length === 0) return;
-    if (payments.length === 0) {
-      setErrorMsg("الرجاء إضافة دفعة واحدة على الأقل.");
-      return;
+  // ─── Modals State ───
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ─── ALMASA Store ───
+  const cartItems = usePOSStore((s) => s.cartItems);
+  const cartTotal = usePOSStore((s) => s.cartTotal);
+  const goldPrices = usePOSStore((s) => s.goldPrices);
+  const customerId = usePOSStore((s) => s.customerId);
+  const customerName = usePOSStore((s) => s.customerName);
+  const payments = usePOSStore((s) => s.payments);
+  const idempotencyKey = usePOSStore((s) => s.idempotencyKey);
+  const completedSale = usePOSStore((s) => s.completedSale);
+  const addItem = usePOSStore((s) => s.addItem);
+  const removeItem = usePOSStore((s) => s.removeItem);
+  const setGoldPrices = usePOSStore((s) => s.setGoldPrices);
+  const setCompletedSale = usePOSStore((s) => s.setCompletedSale);
+
+  const lockMutation = useLockInventory();
+  const unlockMutation = useUnlockInventory();
+  const checkoutMutation = useCheckout();
+
+  // ─── Fetch ALMASA Inventory ───
+  const { data: inventoryItems } = useInventory({
+    status: "AVAILABLE",
+    limit: 100, 
+  });
+
+  // ─── Fetch Gold Prices ───
+  const { data: recentPrices } = useQuery({
+    queryKey: ["recentGoldPrices"],
+    queryFn: async () => {
+      const { data } = await api.get<GoldPriceOut[]>("/gold-prices", {
+        params: { limit: 20 },
+      });
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  useEffect(() => {
+    if (recentPrices) {
+      const pricesDict: Record<number, number> = {};
+      recentPrices.forEach((p) => {
+        pricesDict[p.karat] = parseFloat(p.price_per_gram.toString());
+      });
+      setGoldPrices(pricesDict);
+    }
+  }, [recentPrices, setGoldPrices]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // ─── Derived Categories ───
+  const dynamicCategories = useMemo(() => {
+    if (!inventoryItems) return ["الكل"];
+    const cats = new Set<string>();
+    inventoryItems.forEach((item) => {
+      if (item.product?.category?.name) {
+        cats.add(item.product.category.name);
+      }
+    });
+    return ["الكل", ...Array.from(cats)];
+  }, [inventoryItems]);
+
+  // ─── Filtered Products for Grid ───
+  const productCards: ProductCardData[] = useMemo(() => {
+    if (!inventoryItems) return [];
+    
+    let filtered = inventoryItems;
+    if (activeTab !== "الكل") {
+      filtered = filtered.filter((item) => item.product?.category?.name === activeTab);
+    }
+    if (debouncedQuery) {
+      const q = debouncedQuery.toLowerCase();
+      filtered = filtered.filter((item) =>
+        item.product?.name.toLowerCase().includes(q) ||
+        item.sku.toLowerCase().includes(q)
+      );
     }
 
+    return filtered.map((item) => {
+      const pricePerGram = goldPrices[item.karat] || 0;
+      const total = pricePerGram * parseFloat(item.weight) + parseFloat(item.manufacturing_fee);
+      
+      return {
+        id: item.id,
+        name: item.product.name,
+        spec: `عيار ${item.karat} - ${item.weight} جرام`,
+        price: pricePerGram ? total.toLocaleString("ar-EG", { maximumFractionDigits: 0 }) : "—",
+        image: "", // Use fallback in component
+        inCart: cartItems.some((c) => c.id === item.id),
+        isLocking: lockingId === item.id || unlockingId === item.id,
+      };
+    });
+  }, [inventoryItems, activeTab, debouncedQuery, goldPrices, cartItems, lockingId, unlockingId]);
+
+  // ─── Calculate Values for Gold Calculator ───
+  const calcGoldPriceValue = goldPrices[Number(calcKarat)] || 0;
+  const calcEstimate = calcGoldPriceValue * parseFloat(calcWeight || "0") + parseFloat(calcManufacturing || "0");
+  const formattedGoldPrice = calcGoldPriceValue ? calcGoldPriceValue.toLocaleString("ar-EG") : "—";
+  const formattedEstimate = calcGoldPriceValue > 0 ? calcEstimate.toLocaleString("ar-EG", { maximumFractionDigits: 0 }) : "—";
+
+  // ─── Map Cart to Invoice Rows ───
+  const invoiceRows: InvoiceRowData[] = cartItems.map((item) => {
+    const p = goldPrices[item.karat] || 0;
+    const lineTotal = p * parseFloat(item.weight) + parseFloat(item.manufacturing_fee);
+    return {
+      id: item.id,
+      name: item.product.name,
+      weight: item.weight,
+      qty: "1", // ALMASA items are unique physical pieces
+      gram: p ? p.toLocaleString("ar-EG") : "—",
+      craft: item.manufacturing_fee,
+      total: p ? lineTotal.toLocaleString("ar-EG", { maximumFractionDigits: 2 }) : "—",
+    };
+  });
+
+  const totalManufacturing = cartItems.reduce((sum, i) => sum + parseFloat(i.manufacturing_fee), 0);
+  const formattedSubTotal = cartTotal > 0 ? cartTotal.toLocaleString("ar-EG", { maximumFractionDigits: 2 }) : "—";
+  const formattedCraftTotal = totalManufacturing.toLocaleString("ar-EG", { maximumFractionDigits: 2 });
+  const formattedFinalTotal = cartTotal > 0 ? cartTotal.toLocaleString("ar-EG", { maximumFractionDigits: 2 }) : "—";
+
+  // ─── Handlers ───
+  const handleAddProduct = async (id: string) => {
+    const item = inventoryItems?.find(i => i.id === id);
+    if (!item) return;
+
+    setLockingId(item.id);
     setErrorMsg(null);
     try {
-      const payload = {
-        inventory_item_ids: cartItems.map(i => i.id),
-        customer_id: customerId,
-        payments: payments.map(p => ({
-          method: p.method,
-          amount: parseFloat(p.amount.toString()),
-        })),
-        idempotency_key: idempotencyKey, 
-      };
+      const locked = await lockMutation.mutateAsync({
+        id: item.id,
+        payload: { reason: "POS_CHECKOUT", reference_type: "POS_CART" },
+      });
+      addItem(locked);
+    } catch {
+      setErrorMsg(`فشل حجز القطعة (${item.sku}). قد تكون محجوزة بالفعل أو غير متاحة.`);
+    } finally {
+      setLockingId(null);
+    }
+  };
 
-      const sale = await checkoutMutation.mutateAsync(payload);
-      
+  const handleRemoveItem = async (id: string) => {
+    setUnlockingId(id);
+    setErrorMsg(null);
+    try {
+      await unlockMutation.mutateAsync({
+        id,
+        payload: { reason: "MANUAL_UNLOCK" },
+      });
+      removeItem(id);
+    } catch {
+      setErrorMsg("فشل إزالة القطعة من السلة. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setUnlockingId(null);
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (cartItems.length === 0 || payments.length === 0) return;
+    setIsSubmitting(true);
+    setErrorMsg(null);
+    try {
+      const sale = await checkoutMutation.mutateAsync({
+        inventory_item_ids: cartItems.map((i) => i.id),
+        customer_id: customerId,
+        payments, 
+        idempotency_key: idempotencyKey,
+      });
       setCompletedSale(sale);
-      clearCart();
-    } catch (err: any) {
-      if (err?.response?.status === 409) {
-        setErrorMsg(`خطأ تعارض: ${err?.response?.data?.detail || "تم إجراء هذه العملية مسبقاً أو القطعة مباعة."}`);
-      } else {
-        setErrorMsg(`فشل إتمام البيع: ${err?.response?.data?.detail || "تأكد من الاتصال بالخادم وحاول مجدداً."}`);
-      }
+      setIsCheckoutModalOpen(false);
+    } catch (error: any) {
+      setErrorMsg(error?.response?.data?.detail || "فشل إتمام عملية البيع. يرجى مراجعة المدفوعات والمحاولة مرة أخرى.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)] max-w-[1920px] mx-auto px-4 py-4 gap-4 bg-background">
-      <div className="flex items-center justify-between pb-4 border-b border-white/10 shrink-0">
-        <div className="flex items-center gap-4">
-          <h2 className="font-display text-2xl text-white tracking-wide">نقطة البيع</h2>
-          <span className="h-4 w-px bg-white/20"></span>
-          <span className="font-sans text-[10px] text-white/50 uppercase tracking-luxury-wide">
-            ALMASA POS TERMINAL
-          </span>
-        </div>
-        <div className="font-numeric text-sm tracking-widest text-primary/80">
-          Terminal ID: {user?.username?.toUpperCase() || "SYS"} / 01
-        </div>
-      </div>
-
+    <div className="flex h-full flex-col relative">
+      {/* Global POS Error Banner */}
       {errorMsg && (
-        <div className="shrink-0 p-3 bg-red-950/40 text-red-400 border border-red-500/50 text-xs font-sans tracking-wide">
-          {errorMsg}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-red-950/90 text-red-400 border border-red-500/30 px-6 py-3 rounded-lg shadow-lg text-sm flex items-center justify-between gap-4">
+          <span>{errorMsg}</span>
+          <button onClick={() => setErrorMsg(null)} className="text-red-400/50 hover:text-red-400">&times;</button>
         </div>
       )}
 
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4">
-        {/* Left/Main Column: Cart & Items */}
-        <div className="flex-[2] min-w-0 flex flex-col gap-4 h-full">
-          {/* Inventory Selection */}
-          <div className="flex-[2] min-h-0 flex flex-col border border-white/10 bg-black/20">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-white/[0.02]">
-              <Box className="w-3.5 h-3.5 text-primary" />
-              <span className="font-sans text-[11px] text-white uppercase tracking-luxury-wide">1. اختيار القطع</span>
+      <main className="flex-1 px-5 py-5 overflow-y-auto" dir="rtl">
+        <h1 className="mb-5 text-2xl font-bold text-white">نقطة البيع</h1>
+
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-stretch h-[calc(100%-3rem)]">
+          {/* Column 1 — Products (40%) */}
+          <div className="flex flex-col xl:w-2/5 min-h-0">
+            <div className="relative shrink-0">
+              <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+              <input
+                type="text"
+                placeholder="ابحث عن منتج..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border border-white/10 bg-[#151515] py-2.5 pr-10 pl-4 text-sm text-white/80 placeholder:text-white/40 focus:border-gold/50 focus:outline-none"
+              />
             </div>
-            <div className="flex-1 overflow-auto p-4 custom-scrollbar">
-              <POSInventorySelector />
+
+            <div className="mt-5 shrink-0">
+              <CategoryTabs 
+                tabs={dynamicCategories} 
+                activeTab={activeTab} 
+                setActiveTab={setActiveTab} 
+              />
+            </div>
+
+            <div className="mt-5 flex-1 overflow-y-auto">
+              <ProductGrid 
+                products={productCards} 
+                onProductClick={handleAddProduct} 
+              />
             </div>
           </div>
 
-          {/* Cart */}
-          <div className="flex-[1] min-h-0 flex flex-col border border-white/10 bg-black/20">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-white/[0.02]">
-              <ShoppingBag className="w-3.5 h-3.5 text-primary" />
-              <span className="font-sans text-[11px] text-white uppercase tracking-luxury-wide">سلة المشتريات</span>
-            </div>
-            <div className="flex-1 overflow-auto p-4 custom-scrollbar">
-              <POSCart />
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Customer, Payment & Summary */}
-        <div className="flex-[1] min-w-0 lg:max-w-[450px] flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar">
-          
-          <div className="flex flex-col border border-white/10 bg-black/20 shrink-0">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-white/[0.02]">
-              <UserSquare2 className="w-3.5 h-3.5 text-primary" />
-              <span className="font-sans text-[11px] text-white uppercase tracking-luxury-wide">2. ربط العميل (اختياري)</span>
-            </div>
-            <div className="p-4">
-              <POSCustomerSelector />
-            </div>
+          {/* Column 2 — Gold Calculator (30%) */}
+          <div className="xl:w-[30%] shrink-0">
+            <GoldCalculator 
+              karat={calcKarat}
+              setKarat={setCalcKarat}
+              weight={calcWeight}
+              setWeight={setCalcWeight}
+              manufacturing={calcManufacturing}
+              setManufacturing={setCalcManufacturing}
+              goldPrice={formattedGoldPrice}
+              finalPrice={formattedEstimate}
+            />
           </div>
 
-          <div className="flex flex-col border border-white/10 bg-black/20 shrink-0">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-white/[0.02]">
-              <Wallet className="w-3.5 h-3.5 text-primary" />
-              <span className="font-sans text-[11px] text-white uppercase tracking-luxury-wide">3. تسجيل الدفعات</span>
-            </div>
-            <div className="p-4">
-              <POSPaymentForm />
-            </div>
-          </div>
-
-          <div className="mt-auto shrink-0 border border-primary/20 bg-primary/5">
-            <POSSummary 
-              onCheckout={handleCheckout} 
-              isSubmitting={checkoutMutation.isPending} 
+          {/* Column 3 — Invoice (30%) */}
+          <div className="xl:w-[30%] min-h-0 flex flex-col">
+            <InvoicePanel 
+              invoiceNumber="—"
+              customerName={customerName || "—"}
+              customerPhone="—"
+              date={new Date().toISOString().split("T")[0]}
+              totalItems={cartItems.length.toString()}
+              rows={invoiceRows}
+              subTotal={formattedSubTotal}
+              totalManufacturing={formattedCraftTotal}
+              finalTotal={formattedFinalTotal}
+              onPrint={() => setIsCheckoutModalOpen(true)}
+              isSubmitting={isSubmitting}
+              onRemoveItem={handleRemoveItem}
+              onCustomerClick={() => setIsCustomerModalOpen(true)}
             />
           </div>
         </div>
-      </div>
+      </main>
 
-      <InvoiceModal />
+      {/* Modals */}
+      <CustomerModal 
+        isOpen={isCustomerModalOpen} 
+        onClose={() => setIsCustomerModalOpen(false)} 
+      />
+      
+      <CheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        onCheckout={handleCheckout}
+        isSubmitting={isSubmitting}
+      />
+
+      {/* ALMASA specific success modal */}
+      {completedSale && completedSale.invoice && <InvoiceModal />}
     </div>
   );
 }

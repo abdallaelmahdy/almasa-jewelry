@@ -77,7 +77,7 @@ def get_inventory_valuation(
         func.sum(InventoryItem.cost_basis).label("total_cost_basis"),
         func.sum(InventoryItem.weight).label("total_weight")
     ).filter(
-        InventoryItem.status.in_([ItemStatus.AVAILABLE, ItemStatus.LOCKED])
+        InventoryItem.status == ItemStatus.AVAILABLE
     ).first()
     
     total_cost_basis = result.total_cost_basis or Decimal("0.00")

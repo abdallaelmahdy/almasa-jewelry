@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
-import { Amiri, Alexandria, Playfair_Display } from "next/font/google";
+import { Noto_Naskh_Arabic, Cairo, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 
-const amiri = Amiri({
-  subsets: ["arabic", "latin"],
+const notoNaskh = Noto_Naskh_Arabic({
+  subsets: ["arabic"],
   weight: ["400", "700"],
-  variable: "--font-amiri",
+  variable: "--font-naskh",
 });
 
-const alexandria = Alexandria({
+const cairo = Cairo({
   subsets: ["arabic", "latin"],
   weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-alexandria",
+  variable: "--font-cairo",
 });
 
-const playfair = Playfair_Display({
+const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-playfair",
+  variable: "--font-plex-mono",
 });
 
 export const metadata: Metadata = {
@@ -34,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" className="dark">
-      <body className={`${amiri.variable} ${alexandria.variable} ${playfair.variable} font-sans min-h-screen bg-[#080808] text-[#f4f1ea] antialiased selection:bg-[#d0b47a]/30 selection:text-white`}>
+      <body className={`${notoNaskh.variable} ${cairo.variable} ${plexMono.variable} font-sans min-h-screen bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground`}>
         <QueryProvider>
           <AuthProvider>
             {children}

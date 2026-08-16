@@ -1,10 +1,16 @@
 export type ItemStatus = "AVAILABLE" | "SOLD" | "LOCKED" | "RETURNED";
 
+export interface CategoryOut {
+  id: number;
+  name: string;
+}
+
 export interface ProductOut {
   id: number;
   category_id: number;
   name: string;
   sku_prefix: string;
+  category: CategoryOut;
 }
 
 export interface InventoryItemOut {

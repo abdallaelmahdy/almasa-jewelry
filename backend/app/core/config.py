@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
     ENVIRONMENT: str = "development"
     API_V1_STR: str = "/api/v1"
+    GOLD_API_KEY: str = ""
 
     # JWT Settings
     SECRET_KEY: str = "supersecretkey_please_change_in_production"
@@ -16,6 +17,6 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     class Config:
-        env_file = "../.env"
+        env_file = ".env"
 
 settings = Settings()

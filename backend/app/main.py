@@ -12,12 +12,28 @@ from app.api.v1 import (
 )
 from app.core.config import settings
 from app.core.rate_limit import limiter
+from app.core.background_tasks import sweep_reservations_loop
+import asyncio
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    task = asyncio.create_task(sweep_reservations_loop())
+    yield
+    # Shutdown
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
 
 app = FastAPI(
     title="Almasa Jewelry API",
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url=f"{settings.API_V1_STR}/docs",
     redoc_url=f"{settings.API_V1_STR}/redoc",
+    lifespan=lifespan
 )
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
