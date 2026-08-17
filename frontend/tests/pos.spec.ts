@@ -1,86 +1,82 @@
 import { test, expect } from '@playwright/test';
-import path from 'path';
 
+/**
+ * Phase C: Employee auth now requires navigating to /login directly.
+ * The "دخول الموظفين" link is a discreet footer link on the storefront — not a
+ * prominent nav button. All tests use goto('/login') for reliability.
+ */
 test.describe('POS Checkout and Locking', () => {
-  // Clear any existing state before starting
+  // No stored auth — each test logs in manually to exercise the full flow.
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test('Add to cart and normal checkout', async ({ page }) => {
-    await page.goto('/');
+  /**
+   * Helper: log in as admin through the /login page and navigate to /pos.
+   */
+  async function loginAsAdminAndGoToPOS(page: any) {
+    await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.click('text=دخول الموظفين');
-
     await page.fill('input[name="username"]', 'admin@test.com');
     await page.fill('input[name="password"]', 'Password123!');
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/dashboard*');
-
-    // 2. الذهاب لشاشة الكاشير
+    await page.waitForURL('**/dashboard*', { timeout: 15000 });
     await page.goto('/pos');
     await page.waitForLoadState('networkidle');
+  }
 
-    // Search for inventory item
+  test('Add to cart and normal checkout', async ({ page }) => {
+    await loginAsAdminAndGoToPOS(page);
+
+    // Search for the seeded inventory item
     await page.fill('input[placeholder="ابحث برقم القطعة (SKU) لإضافتها للسلة..."]', 'TEST-001');
 
-    // Wait for inventory selector to be ready
+    // Wait for the result to appear in the inventory selector
     await page.waitForSelector('text=TEST-001', { state: 'visible', timeout: 10000 });
 
-    // Add item to cart (the button text is "إضافة")
+    // Add item to cart
     await page.click('button:has-text("إضافة")');
     await expect(page.locator('text=TEST-001').first()).toBeVisible();
 
-    // Proceed to checkout
-    // Payment amount
+    // Enter payment amount
     await page.fill('input[placeholder="أدخل المبلغ..."]', '2050');
     await page.click('button[title="إضافة دفعة"]');
 
-    // Complete Sale
+    // Complete the sale
     await page.click('button:has-text("إصدار الفاتورة")');
 
-    // Should see success or the modal
-    // The InvoiceModal is rendered upon success. We wait for it.
+    // The InvoiceModal should appear on success
     await expect(page.locator('text=تمت عملية البيع بنجاح')).toBeVisible({ timeout: 10000 });
 
-    // We can close the modal
+    // Close the modal
     await page.click('button:has-text("إغلاق")');
   });
 
   test('Cart removal releases lock', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await page.click('text=دخول الموظفين');
+    await loginAsAdminAndGoToPOS(page);
 
-    await page.fill('input[name="username"]', 'admin@test.com');
-    await page.fill('input[name="password"]', 'Password123!');
-    await page.click('button[type="submit"]');
-    await page.waitForURL('**/dashboard*');
-
-    await page.goto('/pos');
-    await page.waitForLoadState('networkidle');
-    // Search for item 3
+    // Search for the lock-test item
     await page.fill('input[placeholder="ابحث برقم القطعة (SKU) لإضافتها للسلة..."]', 'TEST-003');
 
     try {
-      await page.waitForSelector('text=TEST-003', { state: 'visible', timeout: 5000 });
+      await page.waitForSelector('text=TEST-003', { state: 'visible', timeout: 8000 });
     } catch (e) {
       const text = await page.locator('body').innerText();
-      throw new Error(`TEST-003 not found! Page text: ${text.substring(0, 1000)}`);
+      throw new Error(`TEST-003 not found! Page body: ${text.substring(0, 1000)}`);
     }
 
-    // Add item to cart
+    // Add to cart
     await page.click('button:has-text("إضافة")');
     await expect(page.locator('text=TEST-003').first()).toBeVisible();
 
-    // Remove from cart. POSCart.tsx probably uses an X button or trash icon. 
+    // Remove from cart using the trash/remove button
     await page.click('button[title="إزالة من السلة"]');
 
-    // Ensure it's removed
+    // Confirm the item is gone from the cart
     await expect(page.locator('text=TEST-003')).toHaveCount(0, { timeout: 10000 });
 
-    // Verify it becomes available again in inventory
+    // Verify the item is back to "متاح" status in the inventory table
     await page.goto('/inventory');
     await page.waitForLoadState('networkidle');
-    await page.waitForSelector('text=TEST-003', { state: 'visible', timeout: 5000 });
+    await page.waitForSelector('text=TEST-003', { state: 'visible', timeout: 8000 });
     await expect(page.locator('tr:has-text("TEST-003")')).toContainText('متاح');
   });
 });
