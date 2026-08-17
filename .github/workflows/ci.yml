@@ -41,15 +41,22 @@ jobs:
           pip install -r requirements.txt
           pip install pytest httpx pytest-asyncio
 
-      # Run Backend Tests
+      # alembic.ini lives at the repo root (script_location = backend/alembic).
+      # Must be run from the root so Alembic can locate the config file.
+      - name: Run Alembic migrations
+        working-directory: .
+        env:
+          DATABASE_URL: postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry
+          SECRET_KEY: testing_secret
+        run: alembic upgrade head
+
+      # pytest must run from ./backend so that `from app.*` imports resolve correctly.
       - name: Run Pytest
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry
           SECRET_KEY: testing_secret
-        run: |
-          alembic upgrade head
-          pytest
+        run: pytest
 
       # Frontend Setup
       - name: Set up Node.js
