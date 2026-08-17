@@ -99,7 +99,7 @@ test.describe('Customer Auth Modal', () => {
     await page.waitForLoadState('networkidle');
 
     // The LuxuryHeader has a "تسجيل الدخول" button when no customer is logged in
-    const loginButton = page.locator('header button', { hasText: 'تسجيل الدخول' });
+    const loginButton = page.locator('header button', { hasText: 'تسجيل الدخول' }).filter({ visible: true });
     await expect(loginButton).toBeVisible({ timeout: 5000 });
     await loginButton.click();
 
@@ -122,7 +122,7 @@ test.describe('Customer Auth Modal', () => {
     await page.waitForLoadState('networkidle');
 
     // Open modal via header button
-    const loginButton = page.locator('header button', { hasText: 'تسجيل الدخول' });
+    const loginButton = page.locator('header button', { hasText: 'تسجيل الدخول' }).filter({ visible: true });
     await loginButton.click();
 
     // Click the register tab inside the modal
@@ -140,7 +140,7 @@ test.describe('Customer Auth Modal', () => {
     await page.waitForLoadState('networkidle');
 
     // The LuxuryHeader also has a separate "إنشاء حساب" button
-    const registerButton = page.locator('header button', { hasText: 'إنشاء حساب' });
+    const registerButton = page.locator('header button', { hasText: 'إنشاء حساب' }).filter({ visible: true });
     await expect(registerButton).toBeVisible({ timeout: 5000 });
     await registerButton.click();
 
@@ -153,7 +153,7 @@ test.describe('Customer Auth Modal', () => {
     await page.waitForLoadState('networkidle');
 
     // Open the customer auth modal
-    const loginButton = page.locator('header button', { hasText: 'تسجيل الدخول' });
+    const loginButton = page.locator('header button', { hasText: 'تسجيل الدخول' }).filter({ visible: true });
     await loginButton.click();
 
     // Fill in wrong credentials
@@ -174,7 +174,7 @@ test.describe('Customer Auth Modal', () => {
     await page.waitForLoadState('networkidle');
 
     // Open the customer auth modal
-    const loginButton = page.locator('header button', { hasText: 'تسجيل الدخول' });
+    const loginButton = page.locator('header button', { hasText: 'تسجيل الدخول' }).filter({ visible: true });
     await loginButton.click();
 
     // Use valid employee credentials in the customer modal
@@ -196,7 +196,7 @@ test.describe('Customer Auth Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const loginButton = page.locator('header button', { hasText: 'تسجيل الدخول' });
+    const loginButton = page.locator('header button', { hasText: 'تسجيل الدخول' }).filter({ visible: true });
     await loginButton.click();
 
     // Confirm modal is open

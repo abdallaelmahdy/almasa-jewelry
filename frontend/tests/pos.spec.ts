@@ -33,7 +33,7 @@ test.describe('POS Checkout and Locking', () => {
     await page.waitForSelector('text=TEST-001', { state: 'visible', timeout: 10000 });
 
     // Add item to cart
-    await page.click('button:has-text("إضافة")');
+    await page.getByRole('button', { name: 'إضافة', exact: true }).click();
     await expect(page.locator('text=TEST-001').first()).toBeVisible();
 
     // Enter payment amount
@@ -47,7 +47,7 @@ test.describe('POS Checkout and Locking', () => {
     await expect(page.locator('text=تمت عملية البيع بنجاح')).toBeVisible({ timeout: 10000 });
 
     // Close the modal
-    await page.click('button:has-text("إغلاق")');
+    await page.keyboard.press('Escape');
   });
 
   test('Cart removal releases lock', async ({ page }) => {
@@ -71,6 +71,8 @@ test.describe('POS Checkout and Locking', () => {
     await page.click('button[title="إزالة من السلة"]');
 
     // Confirm the item is gone from the cart
+    // Clear search so it doesn't reappear in results
+    await page.fill('input[placeholder="ابحث برقم القطعة (SKU) لإضافتها للسلة..."]', '');
     await expect(page.locator('text=TEST-003')).toHaveCount(0, { timeout: 10000 });
 
     // Verify the item is back to "متاح" status in the inventory table
