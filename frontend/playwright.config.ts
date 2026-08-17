@@ -1,4 +1,15 @@
 import { defineConfig, devices } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+
+// Cross-platform python discovery for running uvicorn
+const backendDir = path.resolve(__dirname, '../backend');
+let pythonCmd = 'python';
+if (fs.existsSync(path.resolve(backendDir, 'venv/Scripts/python.exe'))) {
+  pythonCmd = path.resolve(backendDir, 'venv/Scripts/python.exe');
+} else if (fs.existsSync(path.resolve(backendDir, 'venv/bin/python'))) {
+  pythonCmd = path.resolve(backendDir, 'venv/bin/python');
+}
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -44,7 +55,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      command: 'cd ../backend && venv\\Scripts\\uvicorn app.main:app --host 0.0.0.0 --port 8001',
+      command: `cd ../backend && "${pythonCmd}" -m uvicorn app.main:app --host 0.0.0.0 --port 8001`,
       port: 8001,
       timeout: 120 * 1000,
       reuseExistingServer: !process.env.CI,
