@@ -8,7 +8,8 @@ from app.api.v1 import (
     auth, users, categories, products,
     gold_prices, inventory, sales,
     customers, reports, audit,
-    pricing, health, public_catalog
+    pricing, health, public_catalog,
+    public, online_orders
 )
 from app.core.config import settings
 from app.core.rate_limit import limiter
@@ -60,6 +61,9 @@ app.include_router(sales.router, prefix="/api/v1/sales", tags=["Sales"])
 app.include_router(customers.router, prefix="/api/v1/customers", tags=["Customers"])
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(audit.router, prefix="/api/v1/audit", tags=["Audit"])
+app.include_router(public.router, prefix="/api/v1/public", tags=["Public Storefront"])
+app.include_router(online_orders.router, prefix="/api/v1/orders", tags=["Online Orders"])
+
 @app.get("/")
 def root():
     return {"message": "Welcome to Almasa Jewelry API"}

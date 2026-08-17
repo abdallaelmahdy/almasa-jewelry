@@ -9,7 +9,7 @@ export interface ProductOut {
   id: number;
   category_id: number;
   name: string;
-  sku_prefix: string;
+  image_url: string | null;
   category: CategoryOut;
 }
 

@@ -104,7 +104,7 @@ export function IntakeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                 <option value="0" disabled>{isLoadingProducts ? "جاري تحميل المنتجات..." : "اختر المنتج"}</option>
                 {products.map(p => (
                   <option key={p.id} value={p.id}>
-                    {p.name} ({p.sku_prefix})
+                    {p.name}
                   </option>
                 ))}
               </select>

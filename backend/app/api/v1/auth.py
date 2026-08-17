@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -12,10 +13,18 @@ from app.models.auth import RefreshSession
 from fastapi import BackgroundTasks
 from app.services.audit import log_audit_background
 from app.schemas.token import Token
+from app.schemas.user import User as UserSchema
 
 from app.core.rate_limit import limiter
 
 router = APIRouter()
+
+
+class CustomerRegisterPayload(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+    full_name: str | None = None
 
 def _create_audit_log(background_tasks: BackgroundTasks, user_id: int, action: str, ip: str = None) -> None:
     background_tasks.add_task(
@@ -172,3 +181,35 @@ def logout(
         samesite="strict"
     )
     return {"msg": "Successfully logged out"}
+
+
+@router.post("/register", response_model=UserSchema, status_code=201)
+@limiter.limit("3/minute")
+def customer_register(
+    request: Request,
+    payload: CustomerRegisterPayload,
+    db: Session = Depends(deps.get_db),
+    background_tasks: BackgroundTasks = None,
+) -> Any:
+    """
+    Self-service customer registration.
+    Creates a user with role='customer'.
+    """
+    if db.query(User).filter(User.email == payload.email).first():
+        raise HTTPException(status_code=400, detail="البريد الإلكتروني مستخدم بالفعل")
+    if db.query(User).filter(User.username == payload.username).first():
+        raise HTTPException(status_code=400, detail="اسم المستخدم مستخدم بالفعل")
+    if not security.is_password_strong(payload.password):
+        raise HTTPException(status_code=400, detail="كلمة المرور يجب أن تكون 12 حرفاً على الأقل")
+
+    user = User(
+        username=payload.username,
+        email=payload.email,
+        hashed_password=security.get_password_hash(payload.password),
+        role="customer",
+        is_active=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user

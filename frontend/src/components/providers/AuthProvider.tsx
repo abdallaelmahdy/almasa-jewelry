@@ -65,7 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Add strict RBAC protection
       if (user && user.role === "employee") {
-        if (pathname.startsWith("/reports") || pathname.startsWith("/audit")) {
+        if (
+          pathname.startsWith("/reports") ||
+          pathname.startsWith("/audit") ||
+          pathname.startsWith("/settings")
+        ) {
           router.push("/dashboard");
         }
       }

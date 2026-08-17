@@ -37,7 +37,8 @@ def create_product(
     
     product = Product(
         name=product_in.name,
-        category_id=product_in.category_id
+        category_id=product_in.category_id,
+        image_url=product_in.image_url,
     )
     db.add(product)
     db.commit()
@@ -66,6 +67,8 @@ def update_product(
         if not category:
             raise HTTPException(status_code=400, detail="Category not found")
         product.category_id = product_in.category_id
+    if product_in.image_url is not None:
+        product.image_url = product_in.image_url
 
     db.commit()
     db.refresh(product)

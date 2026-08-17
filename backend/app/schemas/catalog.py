@@ -25,6 +25,7 @@ class CategoryOut(CategoryInDBBase):
 class ProductBase(BaseModel):
     name: str = Field(..., min_length=1)
     category_id: int
+    image_url: Optional[str] = None
 
 class ProductCreate(ProductBase):
     pass
@@ -32,6 +33,7 @@ class ProductCreate(ProductBase):
 class ProductUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1)
     category_id: Optional[int] = None
+    image_url: Optional[str] = None
 
 class ProductInDBBase(ProductBase):
     id: int
@@ -72,3 +74,20 @@ class GoldPriceOut(GoldPriceInDBBase):
         if isinstance(v, Decimal):
             return str(v.quantize(Decimal('0.01')))
         return str(v)
+
+
+class PublicGoldPriceOut(BaseModel):
+    """Public-safe gold price schema — omits internal fields like created_by_id."""
+    karat: int
+    price_per_gram: str
+    effective_from: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator('price_per_gram', mode='before')
+    @classmethod
+    def serialize_decimal(cls, v):
+        if isinstance(v, Decimal):
+            return str(v.quantize(Decimal('0.01')))
+        return str(v)
+

@@ -42,11 +42,19 @@ export function LuxuryFooter() {
               </ul>
             </div>
 
-            {/* Legal */}
+            {/* Legal / Employee */}
             <div className="space-y-6">
-              <h4 className="font-sans text-[10px] uppercase tracking-luxury-wide text-white/40">قانوني</h4>
+              <h4 className="font-sans text-[10px] uppercase tracking-luxury-wide text-white/40">أخرى</h4>
               <ul className="space-y-4">
-                <li><Link href="/login" className="font-sans text-sm text-white/70 hover:text-white transition-colors mt-8 block">بوابة الإدارة</Link></li>
+                <li>
+                  <Link
+                    href="/login"
+                    className="font-sans text-sm text-white/30 hover:text-white/60 transition-colors flex items-center gap-2"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/20 inline-block" />
+                    دخول الموظفين
+                  </Link>
+                </li>
               </ul>
             </div>
 

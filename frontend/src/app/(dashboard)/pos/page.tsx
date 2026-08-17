@@ -128,7 +128,7 @@ export default function POSPage() {
         name: item.product.name,
         spec: `عيار ${item.karat} - ${item.weight} جرام`,
         price: pricePerGram ? total.toLocaleString("ar-EG", { maximumFractionDigits: 0 }) : "—",
-        image: "", // Use fallback in component
+        image: item.product.image_url || "",
         inCart: cartItems.some((c) => c.id === item.id),
         isLocking: lockingId === item.id || unlockingId === item.id,
       };
