@@ -41,12 +41,18 @@ jobs:
           pip install -r requirements.txt
           pip install pytest httpx pytest-asyncio
 
+      # The backend tests (via conftest.py) expect the database to be named 'almasa_jewelry_test'.
+      - name: Create test database
+        env:
+          PGPASSWORD: almasa_password
+        run: psql -h localhost -U almasa -d almasa_jewelry -c "CREATE DATABASE almasa_jewelry_test;"
+
       # alembic.ini lives at the repo root (script_location = backend/alembic).
       # Must be run from the root so Alembic can locate the config file.
       - name: Run Alembic migrations
         working-directory: .
         env:
-          DATABASE_URL: postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry
+          DATABASE_URL: postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry_test
           SECRET_KEY: testing_secret
         run: alembic upgrade head
 
@@ -54,7 +60,7 @@ jobs:
       - name: Run Pytest
         working-directory: ./backend
         env:
-          DATABASE_URL: postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry
+          DATABASE_URL: postgresql://almasa:almasa_password@localhost:5432/almasa_jewelry_test
           SECRET_KEY: testing_secret
           PYTHONPATH: .
         run: pytest
